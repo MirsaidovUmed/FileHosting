@@ -3,7 +3,7 @@
 return [
     'host' => 'localhost',
     'username' => 'root',
-    'password' => 'root',
+    'password' => '',
     'database' => 'fileHosting',
     'charset' => 'utf8mb4',
     'options' => [

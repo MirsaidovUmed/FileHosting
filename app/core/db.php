@@ -8,6 +8,7 @@ use PDOStatement;
 
 class Database
 {
+    private static ?Database $instance = null;
     private PDO $connection;
 
     public function __construct(array $config)
@@ -27,6 +28,13 @@ class Database
         }
     }
 
+    public static function getInstance(array $config): Database
+    {
+        if (self::$instance === null) {
+            self::$instance = new self($config);
+        }
+        return self::$instance;
+    }
     public function getConnection(): PDO
     {
         return $this->connection;
@@ -47,7 +55,7 @@ class Database
         return $statement;
     }
 
-    public function findOneBy(string $table, int $id): ?array
+    public function findOneById(string $table, int $id): ?array
     {
         $query = "SELECT * FROM $table WHERE id = :id";
 
@@ -59,24 +67,12 @@ class Database
         return $result ?: null;
     }
 
-    public function findAll(string $table): PDOStatement
+    public function findAll(string $table, int $limit = 20): PDOStatement
     {
-        $query = "SELECT * FROM $table";
-
-        $statement = $this->connection->query($query);
-
+        $query = "SELECT * FROM $table LIMIT :limit";
+        $statement = $this->connection->prepare($query);
+        $statement->bindValue(':limit', $limit, PDO::PARAM_INT);
+        $statement->execute();
         return $statement;
-    }
-
-    public function find(string $table, int $id): ?array
-    {
-        $query = "SELECT * FROM $table WHERE id = :id";
-
-        $statement = $this->connection->prepare($query);
-        $statement->execute(['id' => $id]);
-
-        $result = $statement->fetch(PDO::FETCH_ASSOC);
-
-        return $result ?: null;
     }
 }

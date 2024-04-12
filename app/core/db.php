@@ -66,7 +66,7 @@ class Database
 
         return $result ?: null;
     }
-
+    
     public function findAll(string $table, int $limit = 20): PDOStatement
     {
         $query = "SELECT * FROM $table LIMIT :limit";

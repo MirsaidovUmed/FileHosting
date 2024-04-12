@@ -1,21 +1,23 @@
 <?php
 
+namespace App\Models;
+
 class Files
 {
     private $id;
     private $name;
     private $folderId;
-    private $extention;
+    private $extension;
     private $size;
     private $userId;
     private $createdDate;
 
-    public function __construct($id, $name, $folderId, $extention, $size, $userId, $createdDate)
+    public function __construct($id, $name, $folderId, $extension, $size, $userId, $createdDate)
     {
         $this->id = $id;
         $this->name = $name;
         $this->folderId = $folderId;
-        $this->extention = $extention;
+        $this->extension = $extension;
         $this->size = $size;
         $this->userId = $userId;
         $this->createdDate = $createdDate;
@@ -51,14 +53,14 @@ class Files
         $this->folderId = $folderId;
     }
 
-    public function getExtention()
+    public function getExtension()
     {
-        return $this->extention;
+        return $this->extension;
     }
 
-    public function setExtention($extention)
+    public function setExtension($extension)
     {
-        $this->extention = $extention;
+        $this->extension = $extension;
     }
 
     public function getSize()
@@ -97,7 +99,7 @@ class Files
             'id' => $this->id,
             'name' => $this->name,
             'folde_id' => $this->folderId,
-            'extention' => $this->extention,
+            'extension' => $this->extension,
             'size' => $this->size,
             'user_id' => $this->userId,
             'created_date' => $this->createdDate,

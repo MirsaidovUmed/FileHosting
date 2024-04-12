@@ -9,14 +9,14 @@ class Folders
     private int $id;
     private string $name;
     private int $parrentFolderId;
-    private DateTime $created_date;
+    private DateTime $createdDate;
 
-    public function __construct(int $id, string $name, int $parrentFolderId, DateTime $created_date)
+    public function __construct(?int $id, string $name, int $parrentFolderId, ?DateTime $createdDate)
     {
         $this->id = $id;
         $this->name = $name;
         $this->parrentFolderId = $parrentFolderId;
-        $this->created_date = $created_date;
+        $this->created_date = $createdDate;
     }
 
     public function getId(): int
@@ -51,12 +51,12 @@ class Folders
 
     public function getCreatedDate(): DateTime
     {
-        return $this->created_date;
+        return $this->createdDate;
     }
 
-    public function setCreatedDate(DateTime $created_date): void
+    public function setCreatedDate(DateTime $createdDate): void
     {
-        $this->created_date = $created_date;
+        $this->createdDate = $createdDate;
     }
 
     public function toArray(): array
@@ -65,7 +65,7 @@ class Folders
             'id' => $this->id,
             'name' => $this->name,
             'parrent_folder_id' => $this->parrentFolderId,
-            'created_date' => $this->created_date,
+            'created_date' => $this->createdDate->format('Y-m-d H:i:s'),
         ];
     }
 

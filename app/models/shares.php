@@ -11,7 +11,7 @@ class Shares
     private int $fileId;
     private DateTime $createdDate;
 
-    public function __construct(int $id, int $userId, int $fileId, DateTime $createdDate)
+    public function __construct(?int $id, int $userId, int $fileId, ?DateTime $createdDate)
     {
         $this->id = $id;
         $this->userId = $userId;
@@ -65,7 +65,7 @@ class Shares
             'id' => $this->id,
             'user_id' => $this->userId,
             'file_id' => $this->fileId,
-            'created_date' => $this->createdDate,
+            'created_date' => $this->createdDate->format('Y-m-d H:i:s'),
         ];
     }
 

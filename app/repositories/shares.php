@@ -6,7 +6,7 @@ use App\Models\Shares;
 use App\Core\Database;
 use PDO;
 
-class ShareRepository
+class SharesRepository
 {
     protected $db;
     public function __construct(Database $db)

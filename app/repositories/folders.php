@@ -14,7 +14,7 @@ class FoldersRepository
         $this->db = $db;
     }
 
-    public function finbById(int $id): ?Folders
+    public function findById(int $id): ?Folders
     {
         $query = "SELECT * FROM folders WHERE id = :id";
         $statement = $this->db->getConnection()->prepare($query);
@@ -29,7 +29,7 @@ class FoldersRepository
         ) : null;
     }
 
-    public function finbByName(string $name): ?Folders
+    public function findByName(string $name): ?Folders
     {
         $query = 'SELECT * FROM folders WHERE name = :name';
         $statement = $this->db->getConnection()->prepare($query);

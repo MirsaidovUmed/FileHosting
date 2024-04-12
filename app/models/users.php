@@ -11,7 +11,7 @@ class Users
     private string $password;
     private DateTime $createdDate;
 
-    public function __construct(int $id, string $login, string $password, DateTime $createdDate)
+    public function __construct(?int $id, string $login, string $password, ?DateTime $createdDate)
     {
         $this->id = $id;
         $this->login = $login;
@@ -65,7 +65,7 @@ class Users
             'id' => $this->id,
             'login' => $this->login,
             'password' => $this->password,
-            'created_date' => $this->createdDate,
+            'created_date' => $this->createdDate->format('Y-m-d H:i:s'),
         ];
     }
 

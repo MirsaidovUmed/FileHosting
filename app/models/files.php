@@ -14,7 +14,7 @@ class Files
     private int $userId;
     private DateTime $createdDate;
 
-    public function __construct(int $id, string $name, int $folderId, string $extension, float $size, int $userId, DateTime $createdDate)
+    public function __construct(?int $id, string $name, int $folderId, string $extension, float $size, int $userId, ?DateTime $createdDate)
     {
         $this->id = $id;
         $this->name = $name;
@@ -104,7 +104,7 @@ class Files
             'extension' => $this->extension,
             'size' => $this->size,
             'user_id' => $this->userId,
-            'created_date' => $this->createdDate,
+            'created_date' => $this->createdDate->format('Y-m-d H:i:s'),
         ];
     }
 

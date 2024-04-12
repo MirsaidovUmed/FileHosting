@@ -2,77 +2,79 @@
 
 namespace App\Models;
 
+use DateTime;
+
 class Folders
 {
-    private $id;
-    private $name;
-    private $parrent_folder_id;
-    private $created_date;
+    private int $id;
+    private string $name;
+    private int $parrentFolderId;
+    private DateTime $created_date;
 
-    public function __construct($id, $name, $parrent_folder_id, $created_date)
+    public function __construct(int $id, string $name, int $parrentFolderId, DateTime $created_date)
     {
         $this->id = $id;
         $this->name = $name;
-        $this->parrent_folder_id = $parrent_folder_id;
+        $this->parrentFolderId = $parrentFolderId;
         $this->created_date = $created_date;
     }
 
-    public function getId()
+    public function getId(): int
     {
         return $this->id;
     }
 
-    public function setId($id)
+    public function setId(int $id): void
     {
         $this->id = $id;
     }
 
-    public function getName()
+    public function getName(): string
     {
         return $this->name;
     }
 
-    public function setName($name)
+    public function setName(string $name): void
     {
         $this->name = $name;
     }
 
-    public function getParrentFolderId()
+    public function getParrentFolderId(): int
     {
-        return $this->parrent_folder_id;
+        return $this->parrentFolderId;
     }
 
-    public function setParrentFolderId($parrent_folder_id)
+    public function setParrentFolderId(int $parrentFolderId): void
     {
-        $this->parrent_folder_id = $parrent_folder_id;
+        $this->parrentFolderId = $parrentFolderId;
     }
 
-    public function getCreatedDate()
+    public function getCreatedDate(): DateTime
     {
         return $this->created_date;
     }
 
-    public function setCreatedDate($created_date)
+    public function setCreatedDate(DateTime $created_date): void
     {
         $this->created_date = $created_date;
     }
 
-    public function toArray()
+    public function toArray(): array
     {
         return [
             'id' => $this->id,
-            'name'=> $this->name,
-            'parrent_folder_id'=> $this->parrent_folder_id,
+            'name' => $this->name,
+            'parrent_folder_id' => $this->parrentFolderId,
             'created_date' => $this->created_date,
         ];
     }
 
-    public function toJson()
+    public function toJson(): string
     {
         return json_encode($this->toArray());
     }
 
-    public static function fromArray($data)
+    public static function fromArray(array $data): self
     {
         return new self(
             $data['id'] ?? null,
@@ -82,7 +84,7 @@ class Folders
         );
     }
 
-    public static function fromJson($json)
+    public static function fromJson(string $json): self
     {
         return self::fromArray(json_decode($json, true));
     }

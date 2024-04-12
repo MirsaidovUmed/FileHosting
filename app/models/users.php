@@ -2,14 +2,16 @@
 
 namespace App\Models;
 
+use DateTime;
+
 class Users
 {
-    private $id;
-    private $login;
-    private $password;
-    private $createdDate;
+    private int $id;
+    private string $login;
+    private string $password;
+    private DateTime $createdDate;
 
-    public function __construct($id, $login, $password, $createdDate)
+    public function __construct(int $id, string $login, string $password, DateTime $createdDate)
     {
         $this->id = $id;
         $this->login = $login;
@@ -17,44 +19,47 @@ class Users
         $this->createdDate = $createdDate;
     }
 
-    public function getId()
+    public function getId(): int
     {
         return $this->id;
     }
 
-    public function getLogin()
-    {
-        return $this->login;
-    }
-    public function getPassword()
-    {
-        return $this->password;
-    }
-    public function getCreatedAt()
-    {
-        return $this->createdDate;
-    }
-
-    public function setId($id)
+    public function setId(int $id): void
     {
         $this->id = $id;
     }
-    public function setLogin($login)
+
+    public function getLogin(): string
+    {
+        return $this->login;
+    }
+
+    public function setLogin(string $login): void
     {
         $this->login = $login;
     }
 
-    public function setPassword($password)
+    public function getPassword(): string
+    {
+        return $this->password;
+    }
+
+    public function setPassword(string $password): void
     {
         $this->password = $password;
     }
 
-    public function setCreatedDate($createdDate)
+    public function getCreatedAt(): DateTime
+    {
+        return $this->createdDate;
+    }
+
+    public function setCreatedDate(DateTime $createdDate): void
     {
         $this->createdDate = $createdDate;
     }
 
-    public function toArray()
+    public function toArray(): array
     {
         return [
             'id' => $this->id,
@@ -64,12 +69,12 @@ class Users
         ];
     }
 
-    public function toJson()
+    public function toJson(): string
     {
         return json_encode($this->toArray());
     }
 
-    public static function fromArray($data)
+    public static function fromArray(array $data): self
     {
         return new self(
             $data['id'] ?? null,
@@ -79,7 +84,7 @@ class Users
         );
     }
 
-    public static function fromJson($json)
+    public static function fromJson(string $json): self
     {
         return self::fromArray(json_decode($json, true));
     }

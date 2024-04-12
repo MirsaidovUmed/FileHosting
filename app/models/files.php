@@ -2,17 +2,19 @@
 
 namespace App\Models;
 
+use DateTime;
+
 class Files
 {
-    private $id;
-    private $name;
-    private $folderId;
-    private $extension;
-    private $size;
-    private $userId;
-    private $createdDate;
+    private int $id;
+    private string $name;
+    private int $folderId;
+    private string $extension;
+    private float $size;
+    private int $userId;
+    private DateTime $createdDate;
 
-    public function __construct($id, $name, $folderId, $extension, $size, $userId, $createdDate)
+    public function __construct(int $id, string $name, int $folderId, string $extension, float $size, int $userId, DateTime $createdDate)
     {
         $this->id = $id;
         $this->name = $name;
@@ -23,77 +25,77 @@ class Files
         $this->createdDate = $createdDate;
     }
 
-    public function getId()
+    public function getId(): int
     {
         return $this->id;
     }
 
-    public function setId($id)
+    public function setId(int $id): void
     {
         $this->id = $id;
     }
 
-    public function getName()
+    public function getName(): string
     {
         return $this->name;
     }
 
-    public function setName($name)
+    public function setName(string $name): void
     {
         $this->name = $name;
     }
 
-    public function getFolderId()
+    public function getFolderId(): int
     {
         return $this->folderId;
     }
 
-    public function setFolderId($folderId)
+    public function setFolderId(int $folderId): void
     {
         $this->folderId = $folderId;
     }
 
-    public function getExtension()
+    public function getExtension(): string
     {
         return $this->extension;
     }
 
-    public function setExtension($extension)
+    public function setExtension(string $extension): void
     {
         $this->extension = $extension;
     }
 
-    public function getSize()
+    public function getSize(): float
     {
         return $this->size;
     }
 
-    public function setSize($size)
+    public function setSize(float $size): void
     {
         $this->size = $size;
     }
 
-    public function getUserId()
+    public function getUserId(): int
     {
         return $this->userId;
     }
 
-    public function setUserId($userId)
+    public function setUserId(int $userId): void
     {
         $this->userId = $userId;
     }
 
-    public function getCreatedDate()
+    public function getCreatedDate(): DateTime
     {
         return $this->createdDate;
     }
 
-    public function setCreatedDate($createdDate)
+    public function setCreatedDate(DateTime $createdDate): void
     {
         $this->createdDate = $createdDate;
     }
 
-    public function toArray()
+    public function toArray(): array
     {
         return [
             'id' => $this->id,
@@ -106,12 +108,12 @@ class Files
         ];
     }
 
-    public function toJson()
+    public function toJson(): string
     {
         return json_encode($this->toArray());
     }
 
-    public static function fromArray($data)
+    public static function fromArray(array $data): self
     {
         return new self(
             $data['id'] ?? null,
@@ -124,7 +126,7 @@ class Files
         );
     }
 
-    public static function fromJson($json)
+    public static function fromJson(string $json): self
     {
         return self::fromArray(json_decode($json, true));
     }

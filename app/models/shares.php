@@ -2,14 +2,16 @@
 
 namespace App\Models;
 
+use DateTime;
+
 class Shares
 {
-    private $id;
-    private $userId;
-    private $fileId;
-    private $createdDate;
+    private int $id;
+    private int $userId;
+    private int $fileId;
+    private DateTime $createdDate;
 
-    public function __construct($id, $userId, $fileId, $createdDate)
+    public function __construct(int $id, int $userId, int $fileId, DateTime $createdDate)
     {
         $this->id = $id;
         $this->userId = $userId;
@@ -17,14 +19,24 @@ class Shares
         $this->createdDate = $createdDate;
     }
 
-    public function getId()
+    public function getId(): int
     {
         return $this->id;
     }
 
-    public function getUserId()
+    public function setId(int $id): void
+    {
+        $this->id = $id;
+    }
+
+    public function getUserId(): int
     {
         return $this->userId;
+    }
+
+    public function setUserId(int $userId): void
+    {
+        $this->userId = $userId;
     }
 
     public function getFileId()
@@ -32,32 +44,22 @@ class Shares
         return $this->fileId;
     }
 
-    public function getCreatedDate()
-    {
-        return $this->createdDate;
-    }
-
-    public function setId($id)
-    {
-        $this->id = $id;
-    }
-
-    public function setUserId($userId)
-    {
-        $this->userId = $userId;
-    }
-
-    public function setFileId($fileId)
+    public function setFileId(int $fileId): void
     {
         $this->fileId = $fileId;
     }
 
-    public function setCreatedDate($createdDate)
+    public function getCreatedDate(): DateTime
+    {
+        return $this->createdDate;
+    }
+
+    public function setCreatedDate(DateTime $createdDate): void
     {
         $this->createdDate = $createdDate;
     }
 
-    public function toArray()
+    public function toArray(): array
     {
         return [
             'id' => $this->id,
@@ -67,12 +69,12 @@ class Shares
         ];
     }
 
-    public function toJson()
+    public function toJson(): string
     {
         return json_encode($this->toArray());
     }
 
-    public static function fromArray($data)
+    public static function fromArray(array $data): self
     {
         return new self(
             $data['id'] ?? null,
@@ -82,7 +84,7 @@ class Shares
         );
     }
 
-    public static function fromJson($json)
+    public static function fromJson(string $json): self
     {
         return self::fromArray(json_decode($json, true));
     }

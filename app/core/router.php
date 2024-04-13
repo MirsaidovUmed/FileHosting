@@ -5,6 +5,12 @@ namespace App\Core;
 class Router
 {
     private array $routes = [];
+    private Database $database;
+
+    public function __construct(Database $database)
+    {
+        $this->database = $database;
+    }
 
     public function addRoute(string $method, string $pattern, callable $callback): void
     {
@@ -15,7 +21,7 @@ class Router
     {
         foreach ($this->routes as $route) {
             if ($this->requestMatchesRoute($request, $route)) {
-                return call_user_func($route['callback'], $request);
+                return call_user_func($route['callback'], $request, $this->database); // Передаем Database в callback
             }
         }
 

@@ -8,9 +8,9 @@ class App
 {
     private array $services = [];
 
-    public function __construct()
+    public function __construct(Database $database)
     {
-        // Инициализация приложения может быть здесь.
+        $this->registerService('database', $database);
     }
 
     public function registerService(string $serviceName, $serviceInstance): void
@@ -18,6 +18,9 @@ class App
         $this->services[$serviceName] = $serviceInstance;
     }
 
+    /**
+     * @throws Exception
+     */
     public function getService(string $service): ?string
     {
         if ($this->hasService($service)) {

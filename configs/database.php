@@ -8,7 +8,7 @@ return [
     'host' => 'localhost',
     'username' => 'root',
     'password' => '',
-    'database' => 'FileHosting',
+    'database' => 'file_hosting',
     'charset' => 'utf8mb4',
     'options' => [
         PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,

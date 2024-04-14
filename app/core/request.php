@@ -11,8 +11,8 @@ class Request
     public function __construct()
     {
         $this->data = $_POST;
-        $this->route = $_SERVER['REQUEST_URI'];
-        $this->method = $_SERVER['REQUEST_METHOD'];
+        $this->route = $_SERVER['REQUEST_URI'] ?? '/';
+        $this->method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
     }
 
     public function getData()

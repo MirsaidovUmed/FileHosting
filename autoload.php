@@ -8,6 +8,5 @@ spl_autoload_register(function (string $class): void {
         if (file_exists($filePath)) {
             require_once $filePath;
         }
-        var_dump($filePath);
     }
 });

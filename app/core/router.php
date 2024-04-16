@@ -2,42 +2,66 @@
 
 namespace App\Core;
 
+use RuntimeException;
+
 class Router
 {
-    private array $routes = [];
-    private Database $database;
+    protected static array $routes = [];
+    protected static array $route = [];
 
-    public function __construct(Database $database)
+    public static function add($regexp, $callback, $method): void
     {
-        $this->database = $database;
+        self::$routes[$regexp] = [
+            'callback' => $callback,
+            'method' => $method
+        ];
     }
 
-    public function addRoute(string $method, string $pattern, callable $callback): void
+    public static function getRoutes(): array
     {
-        $this->routes[] = ['method' => $method, 'pattern' => $pattern, 'callback' => $callback];
+        return self::$routes;
     }
 
-    public function processRequest(Request $request): Response
+    public static function getRoute(): array
     {
-        foreach ($this->routes as $route) {
-            if ($this->requestMatchesRoute($request, $route)) {
-                return call_user_func($route['callback'], $request, $this->database); // Передаем Database в callback
+        return self::$route;
+    }
+
+    protected static function removeQueryString($url): string
+    {
+        if ($url) {
+            $params = explode('?', $url, 2);
+            if (false === str_contains($params[0], '=')) {
+                return rtrim($params[0], '/');
+            }
+        }
+        return '';
+    }
+
+    public static function dispatch($url, $method): Response
+    {
+        $url = self::removeQueryString($url);
+        $matchedRoute = null;
+
+        foreach (self::$routes as $pattern => $route) {
+            if (preg_match("#^$pattern$#", $url, $matches) && $method === $route['method']) {
+                $matchedRoute = $route;
+                foreach ($matches as $k => $v) {
+                    if (is_string($k)) {
+                        $matchedRoute['params'][$k] = $v;
+                    }
+                }
+                break;
             }
         }
 
-        return $this->notFoundResponse();
+        if ($matchedRoute) {
+            $callback = $matchedRoute['callback'];
+            $response = $callback(new Request());
+            return $response;
+        } else {
+            throw new RuntimeException('Страница не найдена', 404);
+        }
     }
 
-    private function requestMatchesRoute(Request $request, array $route): bool
-    {
-        return $request->getMethod() === $route['method'] && preg_match($route['pattern'], $request->getRoute());
-    }
-
-    private function notFoundResponse(): Response
-    {
-        $response = new Response();
-        $response->setData('404 Not Found');
-        $response->setHeaders(['HTTP/1.1 404 Not Found']);
-        return $response;
-    }
 }

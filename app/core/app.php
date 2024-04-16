@@ -2,36 +2,31 @@
 
 namespace App\Core;
 
-use Exception;
+use App\Core\Router;
 
 class App
 {
     private array $services = [];
 
-    public function __construct(Database $database)
+    public function __construct()
     {
-        $this->registerService('database', $database);
+        $this->registerService('router', function () {
+            return new Router($this);
+        });
     }
 
-    public function registerService(string $serviceName, $serviceInstance): void
+    public function registerService(string $name, callable $service)
     {
-        $this->services[$serviceName] = $serviceInstance;
+        $this->services[$name] = $service;
     }
 
-    /**
-     * @throws Exception
-     */
-    public function getService(string $service): ?string
+    public function getService(string $name)
     {
-        if ($this->hasService($service)) {
-            return $this->services[$service];
-        }
-
-        throw new Exception("Сервис '{$service}' не зарегистрирован.");
+        return $this->services[$name]();
     }
 
-    public function hasService(string $service): bool
+    public function getRouter(): Router
     {
-        return isset($this->services[$service]);
+        return $this->getService('router');
     }
 }

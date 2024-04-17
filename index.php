@@ -2,19 +2,19 @@
 
 require_once __DIR__ . "/vendor/autoload.php";
 
-use src\Core\App;
+use App\Core\App;
 use Config\Config;
-use src\Core\Database;
-use src\Core\Request;
-use src\Core\Router;
-use src\Core\Response;
+use App\Core\Database;
+use App\Core\Request;
+use App\Core\Router;
+use App\Core\Response;
 
 $config = new Config();
 $config->load(__DIR__ . "/composer.json");
 
 $configArray = $config->get('database');
 
-$db = new Database($configArray);
+$db = Database::getInstance($configArray);
 $app = new App([]);
 
 $router = new Router([]);

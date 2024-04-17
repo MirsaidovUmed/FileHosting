@@ -1,6 +1,6 @@
 <?php
 
-namespace src\Core;
+namespace App\Core;
 
 use PDO;
 use PDOException;
@@ -11,22 +11,11 @@ class Database
     private static ?Database $instance = null;
     private PDO $conn;
 
-    private function __construct(array $config)
+    public function __construct(array $config)
     {
-        $host = $config['host'];
-        $username = $config['username'];
-        $password = $config['password'];
-        $database = $config['database'];
-        $charset = $config['charset'];
-        $options = $config['options'];
-
-        try {
-            $dsn = "mysql:host=$host;dbname=$database;charset=$charset";
-            $this->connection = new PDO($dsn, $username, $password, $options);
-        } catch (PDOException $e) {
-            throw new PDOException("Connection failed: " . $e->getMessage());
-        }
-
+        $dsn = "mysql:host={$config['host']};dbname={$config['dbname']}";
+        $this->conn = new PDO($dsn, $config['username'], $config['password']);
+        $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     }
 
     public static function getInstance(array $config): Database

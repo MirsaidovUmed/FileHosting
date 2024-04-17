@@ -8,7 +8,7 @@ use PDOStatement;
 
 class Database
 {
-    private static ?Database $instance = null;
+    private ?Database $instance = null;
     private PDO $conn;
 
     public function __construct(array $config)
@@ -18,7 +18,7 @@ class Database
         $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     }
 
-    public static function getInstance(array $config): Database
+    public function getInstance(array $config): Database
     {
         if (self::$instance === null) {
             self::$instance = new self($config);

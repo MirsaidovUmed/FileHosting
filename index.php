@@ -10,11 +10,12 @@ use App\Core\Router;
 use App\Core\Response;
 
 $config = new Config();
-$config->load(__DIR__ . "/composer.json");
+$config->load(__DIR__ . "/config.json");
 
 $configArray = $config->get('database');
+var_dump($configArray);
 
-$db = Database::getInstance($configArray);
+$db = new Database($configArray);
 $app = new App([]);
 
 $router = new Router([]);

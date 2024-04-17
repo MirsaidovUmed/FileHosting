@@ -12,8 +12,8 @@ class Config
         $this->config = json_decode($configData, true);
     }
 
-    public static function get(string $key, $default = null)
+    public function get(string $key, $default = null)
     {
-        return self::$config[$key] ?? $default;
+        return $this->config[$key] ?? $default;
     }
 }

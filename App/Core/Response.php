@@ -27,9 +27,10 @@ class Response
 
     public function send(): void
     {
-        foreach ($this->headers as $header) {
-            header($header);
+        if (!headers_sent()) {
+            foreach ($this->headers as $header) {
+                header($header);
+            }
         }
-        echo $this->data;
     }
 }

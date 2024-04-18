@@ -10,7 +10,7 @@ class App
         foreach ($services as $serviceName => $serviceInstance) {
             $this->setService($serviceName, $serviceInstance);
         }
-        }
+    }
 
     public function setService(string $serviceName, string $serviceInstance): void
     {

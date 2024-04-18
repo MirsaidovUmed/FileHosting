@@ -10,8 +10,8 @@ class Request
 
     public function __construct()
     {
-        $this->method = $_SERVER['REQUEST_METHOD'];
-        $this->url = $_SERVER['REQUEST_URI'];
+        $this->method = isset($_SERVER['REQUEST_METHOD']) ? $_SERVER['REQUEST_METHOD'] : '';
+        $this->url = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '';
         $this->data = array_merge($_GET, $_POST);
     }
 

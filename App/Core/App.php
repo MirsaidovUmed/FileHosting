@@ -5,6 +5,7 @@ namespace App\Core;
 class App
 {
     private array $services = [];
+    
     public function __construct(array $services)
     {
         foreach ($services as $serviceName => $serviceInstance) {
@@ -39,5 +40,15 @@ class App
     public function cleanService(string $serviceName): array
     {
         return $this->services = [];
+    }
+
+    public function getDatabase(): ?Database
+    {
+        if (!isset($this->services['database'])) {
+            $config = $this->services['config'];
+            $this->services['database'] = new Database($config->get('database'));
+        }
+
+        return $this->services['database'];
     }
 }

@@ -22,7 +22,7 @@ class Router
         }
     }
 
-    public function dispatch(Request $request): Response
+    private function dispatch(Request $request): Response
     {
         $url = $request->getUrl();
         $method = $request->getMethod();

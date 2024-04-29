@@ -6,11 +6,9 @@ class App
 {
     private array $services = [];
 
-    public function __construct(array $services)
+    public function __construct(array $services = [])
     {
-        foreach ($services as $serviceName => $serviceInstance) {
-            $this->addService($serviceName, $serviceInstance);
-        }
+        $this->addServicesFromArray($services);
     }
 
     public function addService(string $serviceName, object $serviceInstance): void
@@ -35,5 +33,12 @@ class App
         }
 
         return false;
+    }
+
+    public function addServicesFromArray(array $services): void
+    {
+        foreach ($services as $serviceName => $serviceInstance) {
+            $this->addService($serviceName, $serviceInstance);
+        }
     }
 }

@@ -11,17 +11,17 @@ class Database
     private static ?Database $instance = null;
     private PDO $conn;
 
-    private function __construct(array $config)
+    private function __construct()
     {
-        $dsn = "mysql:host={$config['host']};dbname={$config['dbname']}";
-        $this->conn = new PDO($dsn, $config['username'], $config['password']);
-        $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     }
 
     public static function getInstance(array $config): Database
     {
         if (self::$instance === null) {
-            self::$instance = new self($config);
+            $dsn = "mysql:host={$config['host']};dbname={$config['dbname']}";
+            self::$instance = new self();
+            self::$instance->conn = new PDO($dsn, $config['username'], $config['password']);
+            self::$instance->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         }
         return self::$instance;
     }

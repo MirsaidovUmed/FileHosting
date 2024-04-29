@@ -63,6 +63,25 @@ class UserController
         }
     }
 
+    public function getUserById(Request $request): Response
+    {
+        $data = $request->getData();
+
+        if (!isset($data['id'])) {
+            return new Response(['HTTP/1.1 400 Bad Request'], 'User ID is missing');
+        }
+
+        $userId = $data['id'];
+
+        $user = $this->userService->findById($userId);
+
+        if (!$user) {
+            return new Response(['HTTP/1.1 404 Not Found'], 'User not found');
+        }
+
+        return new Response(['HTTP/1.1 200 OK', 'Content-Type: application/json'], json_encode($user));
+    }
+
     public function deleteUser(Request $request): Response
     {
         $data = $request->getData();

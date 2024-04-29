@@ -38,6 +38,11 @@ class UserService
         return $this->userRepository->updateUser($user);
     }
 
+    public function findById(int $userId): ?array
+    {
+        return $this->userRepository->findById($userId);
+    }
+
     public function deleteUser(int $userId): bool
     {
         $user = $this->userRepository->findById($userId);

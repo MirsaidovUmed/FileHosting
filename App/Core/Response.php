@@ -32,5 +32,6 @@ class Response
                 header($header);
             }
         }
+        echo $this->data;
     }
 }

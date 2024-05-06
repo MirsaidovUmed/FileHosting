@@ -7,7 +7,7 @@ use App\Repositories\UserRepository;
 
 class UserService
 {
-    protected $userRepository;
+    protected UserRepository $userRepository;
 
     public function __construct(UserRepository $userRepository)
     {
@@ -38,7 +38,7 @@ class UserService
         return $this->userRepository->updateUser($user);
     }
 
-    public function findById(int $userId): ?array
+    public function findById(int $userId): UserModel
     {
         return $this->userRepository->findById($userId);
     }

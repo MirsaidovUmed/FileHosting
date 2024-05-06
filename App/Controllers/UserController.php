@@ -8,7 +8,7 @@ use App\Services\UserService;
 
 class UserController
 {
-    protected $userService;
+    protected UserService $userService;
 
     public function __construct(UserService $userService)
     {
@@ -47,12 +47,8 @@ class UserController
 
         $existingUserData = $this->userService->findById($userId);
 
-        if (!$existingUserData) {
-            return new Response(['HTTP/1.1 404 Not Found'], 'User not found');
-        }
-
-        $login = isset($data['login']) ? $data['login'] : $existingUserData['login'];
-        $password = isset($data['password']) ? $data['password'] : $existingUserData['password'];
+        $login = $data['login'] ?? $existingUserData['login'];
+        $password = $data['password'] ?? $existingUserData['password'];
 
         $success = $this->userService->updateUser($userId, $login, $password);
 
@@ -74,10 +70,6 @@ class UserController
         $userId = $data['id'];
 
         $user = $this->userService->findById($userId);
-
-        if (!$user) {
-            return new Response(['HTTP/1.1 404 Not Found'], 'User not found');
-        }
 
         return new Response(['HTTP/1.1 200 OK', 'Content-Type: application/json'], json_encode($user));
     }

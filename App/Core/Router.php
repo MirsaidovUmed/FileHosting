@@ -19,22 +19,35 @@ class Router
     public function proccessRequest(Request $request): Response
     {
         try {
-            $response = $this->dispatch($request);
-
-            return $response;
+            return $this->dispatch($request);
         } catch (\Exception $e) {
             $this->errorPage404();
             return new Response(["Internal Server Error"], 500);
         }
     }
 
-    public function errorPage404()
+    public function errorPage404(): void
     {
-        $host = 'http://' . $_SERVER['HTTP_HOST'] . '/';
         header('HTTP/1.1 404 Not Found');
-        header("Status: 404 Not Found");
-        header('Location:' . $host . '404');
+        header('Location: /');
+        exit();
     }
+
+//    private function dispatch(Request $request): Response
+//    {
+//        $url = $request->getUrl();
+//        $method = $request->getMethod();
+//
+//        foreach ($this->routes as $route) {
+//            if (isset($route['url']) && $route['url'] === $url && $route['method'] === $method) {
+//                $callback = $route['callback'];
+//
+//                return $callback[$request];
+//            }
+//        }
+//        return new Response(['Not Found'], 404);
+//    }
+
 
     private function dispatch(Request $request): Response
     {
@@ -45,8 +58,13 @@ class Router
             if (isset($route['url']) && $route['url'] === $url && $route['method'] === $method) {
                 $callback = $route['callback'];
 
-                $response = $callback[$request];
-                return $response;
+                if (is_callable($callback)) {
+                    return $callback($request);
+                } elseif (is_array($callback) && count($callback) == 2) {
+                    list($class, $method) = $callback;
+                    $object = new $class;
+                    return $object->$method($request);
+                }
             }
         }
         return new Response(['Not Found'], 404);
@@ -59,22 +77,22 @@ class Router
         $web->register($this, $userService);
     }
 
-    public function get(string $uri, callable $action)
+    public function get(string $uri, callable $action): void
     {
         $this->routes['GET'][$uri] = $action;
     }
 
-    public function post(string $uri, callable $action)
+    public function post(string $uri, callable $action): void
     {
         $this->routes['POST'][$uri] = $action;
     }
 
-    public function put(string $uri, callable $action)
+    public function put(string $uri, callable $action): void
     {
         $this->routes['PUT'][$uri] = $action;
     }
 
-    public function delete(string $uri, callable $action)
+    public function delete(string $uri, callable $action): void
     {
         $this->routes['DELETE'][$uri] = $action;
     }

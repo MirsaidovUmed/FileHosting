@@ -3,97 +3,38 @@
 namespace App\Core;
 
 use App\Routes\Web;
+use Throwable;
 
 class Router
 {
-    protected array $routes = [];
-    protected App $app;
+    const URL_LIST = [
+        'user' => [
+            'GET' => 'User::showUser',
+            'POST' => 'User::createUser'
+        ],
+    ];
 
-    public function __construct(App $app, array $routes = [])
+    public function processRequest(Request $request): Response
     {
-        $this->app = $app;
-        $this->routes = $routes;
-    }
-
-
-    public function proccessRequest(Request $request): Response
-    {
-        try {
-            return $this->dispatch($request);
-        } catch (\Exception $e) {
-            $this->errorPage404();
-            return new Response(["Internal Server Error"], 500);
-        }
-    }
-
-    public function errorPage404(): void
-    {
-        header('HTTP/1.1 404 Not Found');
-        header('Location: /');
-        exit();
-    }
-
-//    private function dispatch(Request $request): Response
-//    {
-//        $url = $request->getUrl();
-//        $method = $request->getMethod();
-//
-//        foreach ($this->routes as $route) {
-//            if (isset($route['url']) && $route['url'] === $url && $route['method'] === $method) {
-//                $callback = $route['callback'];
-//
-//                return $callback[$request];
-//            }
-//        }
-//        return new Response(['Not Found'], 404);
-//    }
-
-
-    private function dispatch(Request $request): Response
-    {
-        $url = $request->getUrl();
-        $method = $request->getMethod();
-
-        foreach ($this->routes as $route) {
-            if (isset($route['url']) && $route['url'] === $url && $route['method'] === $method) {
-                $callback = $route['callback'];
-
-                if (is_callable($callback)) {
-                    return $callback($request);
-                } elseif (is_array($callback) && count($callback) == 2) {
-                    list($class, $method) = $callback;
-                    $object = new $class;
-                    return $object->$method($request);
+        foreach (Web::URL_LIST as $url => $methodsList) {
+            if ($url != $request->getUrl()) {
+                continue;
+            }
+            foreach ($methodsList as $httpMethod => $actionName) {
+                if ($httpMethod != $request->getMethod()) {
+                    continue;
+                }
+                $classInfo = explode('::', $actionName);
+                $controllerClass = 'App\\Controllers\\' . $classInfo[0] . 'Controller';
+                $controllerMethod = $classInfo[1];
+                try {
+                    $controller = new $controllerClass();
+                    return $controller->$controllerMethod($request);
+                } catch (Throwable $e) {
+                    return Response::setError(500, 'Ошибка сервера');
                 }
             }
         }
-        return new Response(['Not Found'], 404);
-    }
-
-    public function loadRoutes(): void
-    {
-        $userService = $this->app->getService('userService');
-        $web = new Web($userService);
-        $web->register($this, $userService);
-    }
-
-    public function get(string $uri, callable $action): void
-    {
-        $this->routes['GET'][$uri] = $action;
-    }
-
-    public function post(string $uri, callable $action): void
-    {
-        $this->routes['POST'][$uri] = $action;
-    }
-
-    public function put(string $uri, callable $action): void
-    {
-        $this->routes['PUT'][$uri] = $action;
-    }
-
-    public function delete(string $uri, callable $action): void
-    {
-        $this->routes['DELETE'][$uri] = $action;
+        return Response::setError(404, 'Страница не существует');
     }
 }

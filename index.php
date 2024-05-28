@@ -12,10 +12,6 @@ use Config\Config;
 use App\Core\Database;
 use App\Core\Request;
 use App\Core\Router;
-use App\Core\Response;
-use App\Services\UserService;
-use App\Repositories\UserRepository;
-
 
 $config = new Config();
 $config->load(__DIR__ . "/config.json");
@@ -23,18 +19,8 @@ $configArray = $config->get('database');
 
 $db = Database::getInstance($configArray);
 
-$userRepository = UserRepository::getInstance($db);
-$app = new App([
-    'db' => $db,
-    'userService' => new UserService($userRepository),
-]);
+$app = new App();
 
-$userService = $app->getService('userService');
-
-$router = new Router($app);
-$router->loadRoutes();
+$router = new Router();
 
 $request = new Request();
-$response = $router->proccessRequest($request);
-
-$response->send();

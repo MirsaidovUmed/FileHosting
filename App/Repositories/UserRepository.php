@@ -7,7 +7,7 @@ use App\Core\Database;
 use DateTime;
 use PDO;
 
-class UserRepository
+class UserRepository extends Repository
 {
     private static ?UserRepository $instance = null;
     private Database $database;

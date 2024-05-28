@@ -5,13 +5,14 @@ namespace App\Services;
 use App\Models\UserModel;
 use App\Repositories\UserRepository;
 
-class UserService
+
+class UserService extends Service
 {
     protected UserRepository $userRepository;
 
-    public function __construct(UserRepository $userRepository)
+    public function __construct(/*UserRepository $userRepository*/)
     {
-        $this->userRepository = $userRepository;
+//        $this->userRepository = $userRepository;
     }
 
     public function createUser(string $login, string $password): bool

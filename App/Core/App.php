@@ -2,43 +2,24 @@
 
 namespace App\Core;
 
+use App\Services\Service;
+use App\Core\Router;
+
 class App
 {
-    private array $services = [];
-
-    public function __construct(array $services = [])
+    public function __construct()
     {
-        $this->addServicesFromArray($services);
     }
 
-    public function addService(string $serviceName, object $serviceInstance): void
+    public function handleRequest(Request $request): Response
     {
-        $this->services[$serviceName] = $serviceInstance;
+        return (new Router())->processRequest($request);
     }
 
-    public function getService(string $serviceName): ?object
+
+    public function getService(string $serviceName): Service
     {
-        if (isset($this->services[$serviceName])) {
-            return $this->services[$serviceName];
-        }
-
-        return null;
-    }
-
-    public function removeService(string $serviceName): bool
-    {
-        if (isset($this->services[$serviceName])) {
-            unset($this->services[$serviceName]);
-            return true;
-        }
-
-        return false;
-    }
-
-    public function addServicesFromArray(array $services): void
-    {
-        foreach ($services as $serviceName => $serviceInstance) {
-            $this->addService($serviceName, $serviceInstance);
-        }
+        $class = 'App\\Services\\' . $serviceName . 'Service';
+        return new $class();
     }
 }

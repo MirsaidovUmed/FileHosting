@@ -4,34 +4,41 @@ namespace App\Core;
 
 class Response
 {
-    protected array $headers;
-    protected string $data;
+    private int $responseCode;
+    private string $responseData;
 
-    public function __construct(array $headers, string $data)
+    public function __construct(int $responseCode, string $responseData)
     {
-        $this->headers = $headers;
-        $this->data = $data;
+        $this->responseCode = $responseCode;
+        $this->responseData = $responseData;
     }
 
-    public function setHeaders(array $headers): self
+    public static function setOK(): Response
     {
-        $this->headers = $headers;
-        return $this;
+        return new self(200, 'OK');
     }
 
-    public function setData(string $data): self
+    public static function setData(string $responseData): Response
     {
-        $this->data = $data;
-        return $this;
+        return new self(200, $responseData);
     }
 
-    public function send(): void
+    public static function setError(int $responseCode, string $responseData): Response
     {
-        if (!headers_sent()) {
-            foreach ($this->headers as $header) {
-                header($header);
+        return new self($responseCode, $responseData);
+    }
+
+    public function sendResponse(): void
+    {
+        if ($this->responseCode == 200) {
+            echo $this->responseData;
+        } else {
+            http_response_code($this->responseCode);
+            if (!str_contains($this->responseData, ';')) {
+                echo json_encode(array('statusMessage' => $this->responseData));
+            } else {
+                echo json_encode(array('statusMessage' => explode(';', $this->responseData)));
             }
         }
-        echo $this->data;
     }
 }

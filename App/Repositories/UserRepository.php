@@ -3,7 +3,6 @@
 namespace App\Repositories;
 
 use App\Models\User;
-use App\Core\Database;
 use DateTime;
 use PDO;
 use Exception;

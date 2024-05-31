@@ -13,7 +13,7 @@ use Config\Config;
 $config = new Config();
 $config->load(__DIR__ . "/config.json");
 
-$app = new App();
+$app = new App($config);
 
 $request = new Request();
 $request->setRequestParams();

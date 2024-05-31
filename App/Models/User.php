@@ -6,11 +6,11 @@ use DateTime;
 
 class User
 {
-    public int $id;
+    public ?int $id;
     public string $login;
     public string $password;
     public string $role;
-    public DateTime $createdDate;
+    public ?DateTime $createdDate;
 
     public function __construct(?int $id, string $login, string $password, string $role, ?DateTime $createdDate)
     {

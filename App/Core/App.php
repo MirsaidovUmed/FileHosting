@@ -2,13 +2,16 @@
 
 namespace App\Core;
 
+use App\Repositories\Repository;
 use App\Services\Service;
+use Config\Config;
 use Exception;
 
 class App
 {
-    public function __construct()
+    public function __construct(Config $config)
     {
+        Repository::setConfig($config);
     }
 
     public function handleRequest(Request $request): Response

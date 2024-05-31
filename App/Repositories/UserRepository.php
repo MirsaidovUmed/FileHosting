@@ -10,19 +10,12 @@ use Exception;
 
 class UserRepository extends Repository
 {
-    private Database $database;
-
-    private function __construct(Database $database)
-    {
-        $this->database = $database;
-    }
-
     /**
      * @throws Exception
      */
     public function findById(int $id): ?User
     {
-        $userData = $this->database->findOneById('users', $id);
+        $userData = self::$database->findOneById('users', $id);
 
         if ($userData) {
             $createdDate = isset($userData['created_date']) ? new DateTime($userData['created_date']) : null;
@@ -42,7 +35,7 @@ class UserRepository extends Repository
     {
         $query = 'SELECT * FROM users LIMIT :limit';
 
-        $stmt = $this->database->getConnection()->prepare($query);
+        $stmt = self::$database->getConnection()->prepare($query);
         $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
         $stmt->execute();
 
@@ -65,7 +58,7 @@ class UserRepository extends Repository
     public function createUser(User $user): bool
     {
         $query = 'INSERT INTO users (login, password, role) VALUES (:login, :password, :role)';
-        $stmt = $this->database->getConnection()->prepare($query);
+        $stmt = self::$database->getConnection()->prepare($query);
         return $stmt->execute([
             'login' => $user->login,
             'password' => $user->password,
@@ -76,7 +69,7 @@ class UserRepository extends Repository
     public function updateUser(User $user): bool
     {
         $query = 'UPDATE users SET login = :login, password = :password, role = :role WHERE id = :id';
-        $stmt = $this->database->getConnection()->prepare($query);
+        $stmt = self::$database->getConnection()->prepare($query);
         return $stmt->execute([
             'login' => $user->login,
             'password' => $user->password,
@@ -88,7 +81,7 @@ class UserRepository extends Repository
     public function deleteUser(User $user): bool
     {
         $query = 'DELETE FROM users WHERE id = :id';
-        $stmt = $this->database->getConnection()->prepare($query);
+        $stmt = self::$database->getConnection()->prepare($query);
         return $stmt->execute(['id' => $user->id]);
     }
 }

@@ -10,9 +10,12 @@ class UserService extends Service
 {
     protected UserRepository $userRepository;
 
-    public function __construct(UserRepository $userRepository)
+    /**
+     * @throws Exception
+     */
+    public function initializeRepositories(): void
     {
-        $this->userRepository = $userRepository;
+        $this->userRepository = UserRepository::getInstance();
     }
 
     public function createUser(string $login, string $password, string $role): bool

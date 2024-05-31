@@ -2,6 +2,7 @@
 
 namespace App\Controllers;
 
+use App\Core\App;
 use App\Core\Request;
 use App\Core\Response;
 use App\Services\UserService;
@@ -9,6 +10,13 @@ use Exception;
 
 class UserController extends BaseController
 {
+    protected UserService $userService;
+
+    public function __construct(App $app)
+    {
+        parent::__construct($app);
+        $this->userService = $this->getService('User');
+    }
 //    protected UserService $userService;
 
 //    public function __construct(UserService $userService)

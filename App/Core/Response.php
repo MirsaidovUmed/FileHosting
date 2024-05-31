@@ -13,9 +13,9 @@ class Response
         $this->responseData = $responseData;
     }
 
-    public static function setOK(): Response
+    public static function setOK(string $responseData = 'OK'): Response
     {
-        return new self(200, 'OK');
+        return new self(200, $responseData);
     }
 
     public static function setData(string $responseData): Response
@@ -30,15 +30,15 @@ class Response
 
     public function sendResponse(): void
     {
+        http_response_code($this->responseCode);
+
         if ($this->responseCode == 200) {
             echo $this->responseData;
         } else {
-            http_response_code($this->responseCode);
-            if (!str_contains($this->responseData, ';')) {
-                echo json_encode(array('statusMessage' => $this->responseData));
-            } else {
-                echo json_encode(array('statusMessage' => explode(';', $this->responseData)));
-            }
+            $response = [
+                'statusMessage' => str_contains($this->responseData, ';') ? explode(';', $this->responseData) : $this->responseData
+            ];
+            echo json_encode($response);
         }
     }
 }

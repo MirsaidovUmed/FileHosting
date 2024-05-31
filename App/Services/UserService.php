@@ -2,27 +2,29 @@
 
 namespace App\Services;
 
-use App\Models\UserModel;
+use App\Models\User;
 use App\Repositories\UserRepository;
-
+use Exception;
 
 class UserService extends Service
 {
     protected UserRepository $userRepository;
 
-    public function __construct(/*UserRepository $userRepository*/)
+    public function __construct(UserRepository $userRepository)
     {
-//        $this->userRepository = $userRepository;
+        $this->userRepository = $userRepository;
     }
 
-    public function createUser(string $login, string $password): bool
+    public function createUser(string $login, string $password, string $role): bool
     {
-        $user = new UserModel(null, $login, $password, null);
-
+        $user = new User(null, $login, $password, $role, null);
         return $this->userRepository->createUser($user);
     }
 
-    public function updateUser(int $userId, string $login = null, string $password = null): bool
+    /**
+     * @throws Exception
+     */
+    public function updateUser(int $userId, ?string $login = null, ?string $password = null, ?string $role = null): bool
     {
         $user = $this->userRepository->findById($userId);
 
@@ -34,16 +36,27 @@ class UserService extends Service
             if ($password !== null) {
                 $user->password = $password;
             }
+
+            if ($role !== null) {
+                $user->role = $role;
+            }
+            return $this->userRepository->updateUser($user);
         }
 
-        return $this->userRepository->updateUser($user);
+        return false;
     }
 
-    public function findById(int $userId): UserModel
+    /**
+     * @throws Exception
+     */
+    public function findById(int $userId): ?User
     {
         return $this->userRepository->findById($userId);
     }
 
+    /**
+     * @throws Exception
+     */
     public function deleteUser(int $userId): bool
     {
         $user = $this->userRepository->findById($userId);

@@ -15,17 +15,25 @@ class Request
         if (str_starts_with($this->url, '/')) {
             $this->url = substr($this->url, 1);
         }
+
+        if (str_starts_with($this->url, 'file/')) {
+            $this->url = substr($this->url, 5);
+        }
+
         $this->method = $_SERVER['REQUEST_METHOD'];
-        if (($this->method == 'GET' && $_SERVER['CONTENT_TYPE'] == 'application/x-www-form-urlencoded')
+        if (($this->method == 'GET' && isset($_SERVER['CONTENT_TYPE']) && $_SERVER['CONTENT_TYPE'] == 'application/x-www-form-urlencoded')
             || $this->method == 'PUT' || $this->method == 'DELETE') {
             $this->params = [];
             parse_str(file_get_contents('php://input'), $this->params);
         } else if ($this->method == "GET") {
-            array_shift($urlParams);
-            $this->params = $urlParams;
+            $this->params = $_GET;
         } else if ($this->method == "POST") {
             $this->params = $_POST;
         }
+
+        error_log("Request URL: " . $this->url);
+        error_log("Request Method: " . $this->method);
+        error_log("Request Params: " . json_encode($this->params));
     }
 
     public function getUrl(): string

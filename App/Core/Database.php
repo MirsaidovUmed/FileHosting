@@ -37,8 +37,7 @@ class Database
         try {
             $stmt = $this->conn->prepare($query);
             $stmt->execute($params);
-            $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            return $result;
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
             return [];
         }

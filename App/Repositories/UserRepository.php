@@ -2,14 +2,14 @@
 
 namespace App\Repositories;
 
-use App\Models\UserModel;
+use App\Models\User;
 use App\Core\Database;
 use DateTime;
 use PDO;
+use Exception;
 
 class UserRepository extends Repository
 {
-    private static ?UserRepository $instance = null;
     private Database $database;
 
     private function __construct(Database $database)
@@ -17,29 +17,25 @@ class UserRepository extends Repository
         $this->database = $database;
     }
 
-    public static function getInstance(Database $database): UserRepository
-    {
-        if (self::$instance === null) {
-            self::$instance = new self($database);
-        }
-        return self::$instance;
-    }
-
-    public function findById(int $id): ?UserModel
+    /**
+     * @throws Exception
+     */
+    public function findById(int $id): ?User
     {
         $userData = $this->database->findOneById('users', $id);
 
         if ($userData) {
             $createdDate = isset($userData['created_date']) ? new DateTime($userData['created_date']) : null;
-            return new UserModel(
+            return new User(
                 $userData['id'],
                 $userData['login'],
                 $userData['password'],
+                $userData['role'],
                 $createdDate
             );
-        } else {
-            return null;
         }
+
+        return null;
     }
 
     public function findAll(int $limit = 20): array
@@ -52,60 +48,47 @@ class UserRepository extends Repository
 
         $userData = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        $this->database->getConnection()->commit();
-
-        return $userData ?: [];
+        return array_map(/**
+         * @throws Exception
+         */ function ($user) {
+            $createdDate = isset($user['created_date']) ? new DateTime($user['created_date']) : null;
+            return new User(
+                $user['id'],
+                $user['login'],
+                $user['password'],
+                $user['role'],
+                $createdDate
+            );
+        }, $userData ?: []);
     }
 
-
-    public function createUser(UserModel $user): bool
+    public function createUser(User $user): bool
     {
-        $query = 'INSERT INTO users (login, password) VALUES (:login, :password)';
+        $query = 'INSERT INTO users (login, password, role) VALUES (:login, :password, :role)';
         $stmt = $this->database->getConnection()->prepare($query);
-        $success = $stmt->execute([
-            'login' => $user->login,
-            'password' => $user->password
-        ]);
-
-        if ($success) {
-            $this->database->getConnection()->commit();
-        } else {
-            $this->database->getConnection()->rollBack();
-        }
-
-        return $success;
-    }
-
-    public function update(UserModel $user): bool
-    {
-        $query = 'UPDATE users SET login = :login, password = :password WHERE id = :id';
-        $stmt = $this->database->getConnection()->prepare($query);
-        $success = $stmt->execute([
+        return $stmt->execute([
             'login' => $user->login,
             'password' => $user->password,
-            'id' => $user->id
+            'role' => $user->role
         ]);
-        if ($success) {
-            $this->database->getConnection()->commit();
-        } else {
-            $this->database->getConnection()->rollBack();
-        }
-
-        return $success;
     }
 
-    public function deleteUser(UserModel $user): bool
+    public function updateUser(User $user): bool
+    {
+        $query = 'UPDATE users SET login = :login, password = :password, role = :role WHERE id = :id';
+        $stmt = $this->database->getConnection()->prepare($query);
+        return $stmt->execute([
+            'login' => $user->login,
+            'password' => $user->password,
+            'role' => $user->role,
+            'id' => $user->id
+        ]);
+    }
+
+    public function deleteUser(User $user): bool
     {
         $query = 'DELETE FROM users WHERE id = :id';
         $stmt = $this->database->getConnection()->prepare($query);
-        $success = $stmt->execute(['id' => $user->id]);
-
-        if ($success) {
-            $this->database->getConnection()->commit();
-        } else {
-            $this->database->getConnection()->rollBack();
-        }
-
-        return $success;
+        return $stmt->execute(['id' => $user->id]);
     }
 }

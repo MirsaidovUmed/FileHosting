@@ -5,91 +5,114 @@ namespace App\Controllers;
 use App\Core\Request;
 use App\Core\Response;
 use App\Services\UserService;
+use Exception;
 
-class UserController
+class UserController extends BaseController
 {
-    protected UserService $userService;
+//    protected UserService $userService;
 
-    public function __construct(UserService $userService)
-    {
-        $this->userService = $userService;
-    }
+//    public function __construct(UserService $userService)
+//    {
+//        $this->userService = $userService;
+//    }
 
+    /**
+     * @throws Exception
+     */
     public function createUser(Request $request): Response
     {
-        $data = $request->getData();
+        $data = $request->getParams();
 
         if (!isset($data["login"]) || !isset($data['password'])) {
-            return new Response(['HTTP/1.1 400 Bad Request'], 'Missing login or password');
+            return Response::setError(400, 'Missing login or password');
         }
 
         $login = $data['login'];
         $password = $data['password'];
+        $role = $data['role'];
 
-        $success = $this->userService->createUser($login, $password);
+        $userService = $this->getService('User');
+        $success = $userService->createUser($login, $password, $role);
 
         if ($success) {
-            return new Response(['HTTP/1.1 201 Created'], 'User created successfully');
+            return Response::setOK('User created successfully');
         } else {
-            return new Response(['HTTP/1.1 500 Internal Server Error'], 'Failed to create user');
+            return Response::setError(500, 'Failed to create user');
         }
     }
 
+    /**
+     * @throws Exception
+     */
     public function updateUser(Request $request): Response
     {
-        $data = $request->getData();
+        $data = $request->getParams();
 
         if (!isset($data['id'])) {
-            return new Response(['HTTP/1.1 400 Bad Request'], 'User ID is missing');
+            return Response::setError(400, 'User ID is missing');
         }
 
         $userId = $data['id'];
 
-        $existingUserData = $this->userService->findById($userId);
+        $userService = $this->getService('User');
+        $existingUserData = $userService->findById($userId);
+        if (!$existingUserData) {
+            return Response::setError(404, 'User not found');
+        }
 
         $login = $data['login'] ?? $existingUserData['login'];
         $password = $data['password'] ?? $existingUserData['password'];
 
-        $success = $this->userService->updateUser($userId, $login, $password);
+        $success = $userService->updateUser($userId, $login, $password);
 
         if ($success) {
-            return new Response(['HTTP/1.1 200 Success'], 'User updated successfully');
+            return Response::setOK('User updated successfully');
         } else {
-            return new Response(['HTTP/1.1 500 Internal Server Error'], 'Failed to update user');
+            return Response::setError(500, 'Failed to update user');
         }
     }
 
+    /**
+     * @throws Exception
+     */
     public function getUserById(Request $request): Response
     {
-        $data = $request->getData();
+        $data = $request->getParams();
 
         if (!isset($data['id'])) {
-            return new Response(['HTTP/1.1 400 Bad Request'], 'User ID is missing');
+            return Response::setError(400, 'User ID is missing');
         }
 
         $userId = $data['id'];
+        $userService = $this->getService('User');
+        $user = $userService->findById($userId);
 
-        $user = $this->userService->findById($userId);
-
-        return new Response(['HTTP/1.1 200 OK', 'Content-Type: application/json'], json_encode($user));
+        if ($user) {
+            return Response::setData(json_encode($user));
+        } else {
+            return Response::setError(404, 'User not found');
+        }
     }
 
+    /**
+     * @throws Exception
+     */
     public function deleteUser(Request $request): Response
     {
-        $data = $request->getData();
+        $data = $request->getParams();
 
         if (!isset($data['id'])) {
-            return new Response(['HTTP/1.1 400 Bad Request'], 'User ID is missing');
+            return Response::setError(400, 'User ID is missing');
         }
 
         $userId = $data['id'];
-
-        $success = $this->userService->deleteUser($userId);
+        $userService = $this->getService('User');
+        $success = $userService->deleteUser($userId);
 
         if ($success) {
-            return new Response(['HTTP/1.1 200 Success'], 'User deleted successfully');
+            return Response::setOK('User deleted successfully');
         } else {
-            return new Response(['HTTP/1.1 500 Internal Server Error'], 'Failed to delete user');
+            return Response::setError(500, 'Failed to delete user');
         }
     }
 }

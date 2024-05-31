@@ -3,7 +3,7 @@
 namespace App\Core;
 
 use App\Services\Service;
-use App\Core\Router;
+use Exception;
 
 class App
 {
@@ -13,13 +13,18 @@ class App
 
     public function handleRequest(Request $request): Response
     {
-        return (new Router())->processRequest($request);
+        return (new Router($this))->processRequest($request);
     }
 
-
+    /**
+     * @throws Exception
+     */
     public function getService(string $serviceName): Service
     {
         $class = 'App\\Services\\' . $serviceName . 'Service';
+        if (!class_exists($class)) {
+            throw new Exception("Сервис не найден: " . $serviceName);
+        }
         return new $class();
     }
 }

@@ -5,10 +5,11 @@ namespace App\Core;
 class Web
 {
     const URL_LIST = [
-      'user' => [
-          'GET' => 'User::showUser',
-          'POST' => 'User::createUser'
-      ]
+        'user' => [
+            'GET' => 'UserController::getUserById',
+            'POST' => 'UserController::createUser',
+            'PUT' => 'UserController::updateUser',
+            'DELETE' => 'UserController::deleteUser',
+        ]
     ];
 }
-

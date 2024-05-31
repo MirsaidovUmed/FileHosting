@@ -12,21 +12,15 @@ class UserController extends BaseController
 {
     protected UserService $userService;
 
+    /**
+     * @throws Exception
+     */
     public function __construct(App $app)
     {
         parent::__construct($app);
         $this->userService = $this->getService('User');
     }
-//    protected UserService $userService;
 
-//    public function __construct(UserService $userService)
-//    {
-//        $this->userService = $userService;
-//    }
-
-    /**
-     * @throws Exception
-     */
     public function createUser(Request $request): Response
     {
         $data = $request->getParams();
@@ -39,8 +33,7 @@ class UserController extends BaseController
         $password = $data['password'];
         $role = $data['role'];
 
-        $userService = $this->getService('User');
-        $success = $userService->createUser($login, $password, $role);
+        $success = $this->userService->createUser($login, $password, $role);
 
         if ($success) {
             return Response::setOK('User created successfully');
@@ -62,16 +55,16 @@ class UserController extends BaseController
 
         $userId = $data['id'];
 
-        $userService = $this->getService('User');
-        $existingUserData = $userService->findById($userId);
+        $existingUserData = $this->userService->findById($userId);
         if (!$existingUserData) {
             return Response::setError(404, 'User not found');
         }
 
         $login = $data['login'] ?? $existingUserData['login'];
         $password = $data['password'] ?? $existingUserData['password'];
+        $role = $data['role'] ?? $existingUserData['role'];
 
-        $success = $userService->updateUser($userId, $login, $password);
+        $success = $this->userService->updateUser($userId, $login, $password, $role);
 
         if ($success) {
             return Response::setOK('User updated successfully');
@@ -92,8 +85,7 @@ class UserController extends BaseController
         }
 
         $userId = $data['id'];
-        $userService = $this->getService('User');
-        $user = $userService->findById($userId);
+        $user = $this->userService->findById($userId);
 
         if ($user) {
             return Response::setData(json_encode($user));
@@ -114,8 +106,7 @@ class UserController extends BaseController
         }
 
         $userId = $data['id'];
-        $userService = $this->getService('User');
-        $success = $userService->deleteUser($userId);
+        $success = $this->userService->deleteUser($userId);
 
         if ($success) {
             return Response::setOK('User deleted successfully');

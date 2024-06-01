@@ -3,15 +3,25 @@
 namespace App\Core;
 
 use App\Repositories\Repository;
-use App\Services\Service;
-use Config\Config;
+use App\Services;
 use Exception;
 
 class App
 {
+    private array $services = [];
+
     public function __construct(Config $config)
     {
-        Repository::setConfig($config);
+        $database = Database::getInstance($config->get('database'));
+        Repository::setDatabase($database);
+        $this->initializeServices();
+    }
+
+    private function initializeServices(): void
+    {
+        $this->services = [
+            'UserService' => new Services\UserService(),
+        ];
     }
 
     public function handleRequest(Request $request): Response
@@ -22,12 +32,12 @@ class App
     /**
      * @throws Exception
      */
-    public function getService(string $serviceName): Service
+    public function getService(string $serviceName): Services\Service
     {
-        $class = 'App\\Services\\' . $serviceName . 'Service';
-        if (!class_exists($class)) {
+        if (!isset($this->services[$serviceName])) {
             throw new Exception("Сервис не найден: " . $serviceName);
         }
-        return new $class();
+
+        return $this->services[$serviceName];
     }
 }

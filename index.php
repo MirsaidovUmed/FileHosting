@@ -8,7 +8,7 @@ error_reporting(E_ALL);
 
 use App\Core\App;
 use App\Core\Request;
-use Config\Config;
+use App\Core\Config;
 
 $config = new Config();
 $config->load(__DIR__ . "/config.json");

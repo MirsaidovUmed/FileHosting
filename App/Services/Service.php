@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Repositories\Repository;
 use Exception;
 
 abstract class Service
@@ -18,7 +19,7 @@ abstract class Service
     /**
      * @throws Exception
      */
-    protected function getRepository(string $repositoryName): mixed
+    protected function getRepository(string $repositoryName): Repository
     {
         if (!isset($this->repositories[$repositoryName])) {
             throw new Exception("Репозиторий не найден: " . $repositoryName);

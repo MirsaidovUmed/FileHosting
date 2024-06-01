@@ -8,20 +8,18 @@ use Exception;
 
 class UserService extends Service
 {
-    protected UserRepository $userRepository;
+    protected function initializeRepositories(): void
+    {
+        $this->repositories['User'] = new UserRepository();
+    }
 
     /**
      * @throws Exception
      */
-    public function initializeRepositories(): void
-    {
-        $this->userRepository = UserRepository::getInstance();
-    }
-
     public function createUser(string $login, string $password, string $role): bool
     {
         $user = new User(null, $login, $password, $role, null);
-        return $this->userRepository->createUser($user);
+        return $this->getRepository('User')->createUser($user);
     }
 
     /**
@@ -29,7 +27,7 @@ class UserService extends Service
      */
     public function updateUser(int $userId, ?string $login = null, ?string $password = null, ?string $role = null): bool
     {
-        $user = $this->userRepository->findById($userId);
+        $user = $this->getRepository('User')->findById($userId);
 
         if ($user) {
             if ($login !== null) {
@@ -43,7 +41,7 @@ class UserService extends Service
             if ($role !== null) {
                 $user->role = $role;
             }
-            return $this->userRepository->updateUser($user);
+            return $this->getRepository('User')->updateUser($userId, $user);
         }
 
         return false;
@@ -54,7 +52,7 @@ class UserService extends Service
      */
     public function findById(int $userId): ?User
     {
-        return $this->userRepository->findById($userId);
+        return $this->getRepository('User')->findById($userId);
     }
 
     /**
@@ -62,12 +60,6 @@ class UserService extends Service
      */
     public function deleteUser(int $userId): bool
     {
-        $user = $this->userRepository->findById($userId);
-
-        if ($user) {
-            return $this->userRepository->deleteUser($user);
-        }
-
-        return false;
+        return $this->getRepository('User')->deleteUser($userId);
     }
 }

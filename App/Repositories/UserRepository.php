@@ -4,17 +4,18 @@ namespace App\Repositories;
 
 use App\Models\User;
 use DateTime;
-use PDO;
 use Exception;
 
 class UserRepository extends Repository
 {
+    protected string $table = 'users';
+
     /**
      * @throws Exception
      */
     public function findById(int $id): ?User
     {
-        $userData = self::$database->findOneById('users', $id);
+        $userData = $this->findOneById($this->table, $id);
 
         if ($userData) {
             $createdDate = isset($userData['created_date']) ? new DateTime($userData['created_date']) : null;
@@ -30,15 +31,9 @@ class UserRepository extends Repository
         return null;
     }
 
-    public function findAll(int $limit = 20): array
+    public function findAllUsers(int $limit = 20): array
     {
-        $query = 'SELECT * FROM users LIMIT :limit';
-
-        $stmt = self::$database->getConnection()->prepare($query);
-        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
-        $stmt->execute();
-
-        $userData = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $userData = $this->findAll($this->table, $limit);
 
         return array_map(/**
          * @throws Exception
@@ -57,30 +52,30 @@ class UserRepository extends Repository
     public function createUser(User $user): bool
     {
         $query = 'INSERT INTO users (login, password, role) VALUES (:login, :password, :role)';
-        $stmt = self::$database->getConnection()->prepare($query);
-        return $stmt->execute([
+        $params = [
             'login' => $user->login,
             'password' => $user->password,
             'role' => $user->role
-        ]);
+        ];
+        return $this->execute($query, $params);
     }
 
-    public function updateUser(User $user): bool
+    public function updateUser(int $id, User $user): bool
     {
         $query = 'UPDATE users SET login = :login, password = :password, role = :role WHERE id = :id';
-        $stmt = self::$database->getConnection()->prepare($query);
-        return $stmt->execute([
+        $params = [
             'login' => $user->login,
             'password' => $user->password,
             'role' => $user->role,
-            'id' => $user->id
-        ]);
+            'id' => $id
+        ];
+        return $this->execute($query, $params);
     }
 
-    public function deleteUser(User $user): bool
+    public function deleteUser(int $id): bool
     {
         $query = 'DELETE FROM users WHERE id = :id';
-        $stmt = self::$database->getConnection()->prepare($query);
-        return $stmt->execute(['id' => $user->id]);
+        $params = ['id' => $id];
+        return $this->execute($query, $params);
     }
 }

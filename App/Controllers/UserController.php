@@ -18,9 +18,12 @@ class UserController extends BaseController
     public function __construct(App $app)
     {
         parent::__construct($app);
-        $this->userService = $this->getService('User');
+        $this->userService = $app->getService('UserService');
     }
 
+    /**
+     * @throws Exception
+     */
     public function createUser(Request $request): Response
     {
         $data = $request->getParams();

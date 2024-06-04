@@ -2,7 +2,7 @@
 
 namespace App\Core;
 
-use Throwable;
+use Exception;
 
 class Router
 {
@@ -13,7 +13,10 @@ class Router
         $this->app = $app;
     }
 
-    public function processRequest(Request $request): Response
+    /**
+     * @throws Exception
+     */
+    public function getController(Request $request): array
     {
         foreach (Web::URL_LIST as $url => $methodsList) {
             $pattern = preg_replace('/\{[a-zA-Z0-9_]+}/', '([a-zA-Z0-9_]+)', $url);
@@ -32,24 +35,17 @@ class Router
                 $controllerClass = 'App\\Controllers\\' . $controllerClass;
 
                 if (!class_exists($controllerClass) || !method_exists($controllerClass, $controllerMethod)) {
-                    return Response::setError(404, 'Контроллер или метод не найден');
+                    throw new Exception('Контроллер или метод не найден');
                 }
 
-                try {
-                    $controller = new $controllerClass($this->app);
-
-                    $params = $request->getParams();
-                    if (!empty($matches)) {
-                        $params['id'] = $matches[0];
-                        $request->setParams($params);
-                    }
-
-                    return $controller->$controllerMethod($request);
-                } catch (Throwable $e) {
-                    return Response::setError(500, 'Ошибка сервера: ' . $e->getMessage());
-                }
+                return [
+                    'class' => $controllerClass,
+                    'method' => $controllerMethod,
+                    'params' => $matches
+                ];
             }
         }
-        return Response::setError(404, 'Страница не существует');
+
+        throw new Exception('Страница не существует');
     }
 }

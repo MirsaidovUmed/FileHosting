@@ -12,16 +12,17 @@ class App
 {
     private array $services = [];
 
+
     /**
      * @throws ReflectionException
      */
-    public function __construct(Config $config)
+    public function init(Config $config): void
     {
-        $this->initializeDatabase($config);
+        $this->connectDatabase($config);
         $this->initializeServices();
     }
 
-    private function initializeDatabase(Config $config): void
+    private function connectDatabase(Config $config): void
     {
         $database = Database::getInstance($config->get('database'));
         Repository::setDatabase($database);

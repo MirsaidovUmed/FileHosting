@@ -31,13 +31,14 @@ class UserRepository extends Repository
         return null;
     }
 
+    /**
+     * @throws Exception
+     */
     public function findAllUsers(int $limit = 20): array
     {
         $userData = $this->findAll($this->table, $limit);
 
-        return array_map(/**
-         * @throws Exception
-         */ function ($user) {
+        return array_map( function ($user) {
             $createdDate = isset($user['created_date']) ? new DateTime($user['created_date']) : null;
             return new User(
                 $user['id'],

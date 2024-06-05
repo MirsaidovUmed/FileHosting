@@ -3,7 +3,7 @@
 namespace App\Core;
 
 use App\Repositories\Repository;
-use App\Services\Service;
+use App\Services\IService;
 use ReflectionClass;
 use Exception;
 use ReflectionException;
@@ -11,7 +11,6 @@ use ReflectionException;
 class App
 {
     private array $services = [];
-
 
     /**
      * @throws ReflectionException
@@ -38,7 +37,7 @@ class App
         foreach (get_declared_classes() as $class) {
             if (str_starts_with($class, $serviceNamespace)) {
                 $reflector = new ReflectionClass($class);
-                if ($reflector->implementsInterface(Service::class) && !$reflector->isAbstract()) {
+                if ($reflector->implementsInterface(IService::class) && !$reflector->isAbstract()) {
                     $serviceName = $reflector->getShortName();
                     $this->services[$serviceName] = $reflector->newInstance();
                 }
@@ -66,7 +65,7 @@ class App
     /**
      * @throws Exception
      */
-    public function getService(string $serviceName): Service
+    public function getService(string $serviceName): IService
     {
         if (!isset($this->services[$serviceName])) {
             throw new Exception("Сервис не найден: " . $serviceName);

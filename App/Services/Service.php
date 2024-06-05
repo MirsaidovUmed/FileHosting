@@ -5,7 +5,7 @@ namespace App\Services;
 use App\Repositories\Repository;
 use Exception;
 
-abstract class Service
+abstract class Service implements IService
 {
     protected array $repositories = [];
 

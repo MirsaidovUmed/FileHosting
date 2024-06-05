@@ -3,7 +3,7 @@
 namespace App\Controllers;
 
 use App\Core\App;
-use App\Services\Service;
+use App\Services\IService;
 use Exception;
 abstract class BaseController
 {
@@ -17,7 +17,7 @@ abstract class BaseController
     /**
      * @throws Exception
      */
-    protected function getService(string $serviceName): Service
+    protected function getService(string $serviceName): IService
     {
         return $this->app->getService($serviceName);
     }

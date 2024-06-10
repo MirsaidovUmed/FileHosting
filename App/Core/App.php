@@ -11,19 +11,26 @@ use ReflectionException;
 class App
 {
     private array $services = [];
+    private Config $config;
 
     /**
      * @throws ReflectionException
      */
     public function init(Config $config): void
     {
-        $this->connectDatabase($config);
+        $this->initConfig($config);
+        $this->initRepositories();
         $this->initializeServices();
     }
 
-    private function connectDatabase(Config $config): void
+    private function initConfig(Config $config): void
     {
-        $database = Database::getInstance($config->get('database'));
+        $this->config = $config;
+    }
+
+    private function initRepositories(): void
+    {
+        $database = Database::getInstance($this->config->get('database'));
         Repository::setDatabase($database);
     }
 

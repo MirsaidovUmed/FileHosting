@@ -3,14 +3,22 @@
 namespace App\Services;
 
 use App\Models\User;
-use App\Repositories\UserRepository;
+use App\Repositories\IUserRepository;
 use Exception;
 
-class UserService extends Service
+class UserService extends Service implements IUserService
 {
+    private IUserRepository $userRepository;
+
+    public function __construct(IUserRepository $userRepository)
+    {
+        $this->userRepository = $userRepository;
+        parent::__construct();
+    }
+
     protected function initializeRepositories(): void
     {
-        $this->repositories['User'] = new UserRepository();
+        $this->repositories['User'] = $this->userRepository;
     }
 
     /**

@@ -5,15 +5,11 @@ namespace App\Repositories;
 use App\Core\Database;
 use Exception;
 use PDO;
-use PDOException;
 
 abstract class Repository implements IRepository
 {
     protected static ?Database $database = null;
 
-    /**
-     * @throws Exception
-     */
     public function __construct()
     {
         if (self::$database === null) {
@@ -21,7 +17,7 @@ abstract class Repository implements IRepository
         }
     }
 
-    public static function setDatabase(Database $database): void
+    public function setDatabase(Database $database): void
     {
         self::$database = $database;
     }
@@ -62,12 +58,8 @@ abstract class Repository implements IRepository
 
     public function execute(string $query, array $params): bool
     {
-        try {
-            $stmt = $this->getConnection()->prepare($query);
-            return $stmt->execute($params);
-        } catch (PDOException $e) {
-            return false;
-        }
+        $stmt = $this->getConnection()->prepare($query);
+        return $stmt->execute($params);
     }
 
     public function query(string $query, array $params = []): array

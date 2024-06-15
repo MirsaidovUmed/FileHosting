@@ -14,7 +14,9 @@ $config = new Config();
 $config->load(__DIR__ . "/config.json");
 
 $app = new App();
-$app->init($config);
+$app->initConfig($config);
+$app->initRepositories();
+$app->initServices();
 
 $request = new Request();
 $request->setRequestParams();

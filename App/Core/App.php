@@ -12,34 +12,44 @@ use ReflectionException;
 class App
 {
     private array $services = [];
+    private array $repositories = [];
     private Config $config;
 
-    /**
-     * @throws ReflectionException
-     */
-    public function init(Config $config): void
-    {
-        $this->initConfig($config);
-        $this->initRepositories();
-        $this->initializeServices();
-    }
-
-    private function initConfig(Config $config): void
+    public function initConfig(Config $config): void
     {
         $this->config = $config;
-    }
-
-    private function initRepositories(): void
-    {
-        $database = Database::getInstance($this->config->get('database'));
-        Repository::setDatabase($database);
     }
 
     /**
      * @throws ReflectionException
      * @throws Exception
      */
-    private function initializeServices(): void
+    public function initRepositories(): void
+    {
+        $repositoryNamespace = 'App\\Repositories';
+
+        foreach (get_declared_classes() as $class) {
+            if (str_starts_with($class, $repositoryNamespace)) {
+                $reflector = new ReflectionClass($class);
+                if ($reflector->implementsInterface(IRepository::class) && !$reflector->isAbstract()) {
+                    $repositoryName = $reflector->getShortName();
+                    $this->repositories[$repositoryName] = $reflector->newInstance();
+                }
+            }
+        }
+
+        // Установка базы данных для всех репозиториев
+        $database = Database::getInstance($this->config->get('database'));
+        foreach ($this->repositories as $repository) {
+            $repository->setDatabase($database);
+        }
+    }
+
+    /**
+     * @throws ReflectionException
+     * @throws Exception
+     */
+    public function initServices(): void
     {
         $serviceNamespace = 'App\\Services';
 
@@ -55,8 +65,8 @@ class App
                         $type = $parameter->getType();
                         if ($type && !$type->isBuiltin()) {
                             $dependencyClassName = $type->getName();
-                            if (is_subclass_of($dependencyClassName, IRepository::class)) {
-                                $dependencies[] = $this->getRepository($dependencyClassName);
+                            if (isset($this->repositories[$dependencyClassName])) {
+                                $dependencies[] = $this->repositories[$dependencyClassName];
                             }
                         }
                     }
@@ -65,17 +75,6 @@ class App
                 }
             }
         }
-    }
-
-    /**
-     * @throws Exception
-     */
-    private function getRepository(string $repositoryClass): IRepository
-    {
-        if (!class_exists($repositoryClass)) {
-            throw new Exception("Репозиторий не найден: " . $repositoryClass);
-        }
-        return new $repositoryClass();
     }
 
     public function handleRequest(Request $request): Response

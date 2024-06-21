@@ -2,11 +2,9 @@
 
 namespace App\Core;
 
-use App\Repositories\IRepository;
-use App\Repositories\Repository;
 use App\Services\IService;
-use ReflectionClass;
 use Exception;
+use ReflectionClass;
 use ReflectionException;
 
 class App
@@ -20,26 +18,30 @@ class App
         $this->config = $config;
     }
 
+    public function getConfig(): Config
+    {
+        return $this->config;
+    }
+
     /**
      * @throws ReflectionException
      * @throws Exception
      */
     public function initRepositories(): void
     {
-        $repositoryNamespace = 'App\\Repositories';
-
-        foreach (get_declared_classes() as $class) {
-            if (str_starts_with($class, $repositoryNamespace)) {
-                $reflector = new ReflectionClass($class);
-                if ($reflector->implementsInterface(IRepository::class) && !$reflector->isAbstract()) {
-                    $repositoryName = $reflector->getShortName();
-                    $this->repositories[$repositoryName] = $reflector->newInstance();
+        $repositoryNamespaces = $this->config->get('repositories');
+        foreach ($repositoryNamespaces as $repositoryNamespace) {
+            foreach (get_declared_classes() as $class) {
+                if (str_starts_with($class, $repositoryNamespace)) {
+                    $reflector = new ReflectionClass($class);
+                    if ($reflector->implementsInterface(IRepository::class) && !$reflector->isAbstract()) {
+                        $repositoryName = $reflector->getShortName();
+                        $this->repositories[$repositoryName] = $reflector->newInstance();
+                    }
                 }
             }
         }
-
-        // Установка базы данных для всех репозиториев
-        $database = Database::getInstance($this->config->get('database'));
+        $database = Connection::getInstance($this->config->get('database'));
         foreach ($this->repositories as $repository) {
             $repository->setDatabase($database);
         }
@@ -51,27 +53,25 @@ class App
      */
     public function initServices(): void
     {
-        $serviceNamespace = 'App\\Services';
-
-        foreach (get_declared_classes() as $class) {
-            if (str_starts_with($class, $serviceNamespace)) {
-                $reflector = new ReflectionClass($class);
-                if ($reflector->implementsInterface(IService::class) && !$reflector->isAbstract()) {
-                    $constructor = $reflector->getConstructor();
-                    $parameters = $constructor->getParameters();
-                    $dependencies = [];
-
-                    foreach ($parameters as $parameter) {
-                        $type = $parameter->getType();
-                        if ($type && !$type->isBuiltin()) {
-                            $dependencyClassName = $type->getName();
-                            if (isset($this->repositories[$dependencyClassName])) {
-                                $dependencies[] = $this->repositories[$dependencyClassName];
+        $serviceNamespaces = $this->config->get('services');
+        foreach ($serviceNamespaces as $serviceNamespace) {
+            foreach (get_declared_classes() as $class) {
+                if (str_starts_with($class, $serviceNamespace)) {
+                    $reflector = new ReflectionClass($class);
+                    if ($reflector->implementsInterface(IService::class) && !$reflector->isAbstract()) {
+                        $constructor = $reflector->getConstructor();
+                        $parameters = $constructor->getParameters();
+                        $dependencies = [];
+                        foreach ($parameters as $parameter) {
+                            $type = $parameter->getType();
+                            if ($type) {
+                                $dependencyClassName = $type->getName();
+                                $dependencies[] = new $dependencyClassName();
                             }
                         }
+                        $serviceName = $reflector->getShortName();
+                        $this->services[$serviceName] = $reflector->newInstanceArgs($dependencies);
                     }
-                    $serviceName = $reflector->getShortName();
-                    $this->services[$serviceName] = $reflector->newInstanceArgs($dependencies);
                 }
             }
         }

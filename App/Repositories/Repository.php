@@ -2,70 +2,57 @@
 
 namespace App\Repositories;
 
-use App\Core\Database;
+use App\Core\Connection;
+use DateTime;
 use Exception;
-use PDO;
 
-abstract class Repository implements IRepository
+abstract class Repository
 {
-    protected static ?Database $database = null;
+    protected Connection $database;
 
-    public function __construct()
+    public function setDatabase(Connection $database): void
     {
-        if (self::$database === null) {
-            throw new Exception("Database not initialized");
+        $this->database = $database;
+    }
+
+    abstract protected static function getModelClass(): string;
+
+    /**
+     * @throws Exception
+     */
+    protected function deserialize(array $data): object
+    {
+        $modelClass = static::getModelClass();
+
+        if (isset($data['created_date'])) {
+            $data['created_date'] = new DateTime($data['created_date']);
         }
+
+        return new $modelClass(...$data);
     }
 
-    public function setDatabase(Database $database): void
+    public function findOneById(int $id): ?array
     {
-        self::$database = $database;
-    }
-
-    protected function getConnection(): PDO
-    {
-        return self::$database->getConnection();
-    }
-
-    public function findOneById(string $table, int $id): ?array
-    {
+        $modelClass = static::getModelClass();
+        $modelInstance = new $modelClass();
+        $table = $modelInstance::getTableName();
         $query = "SELECT * FROM $table WHERE id = :id";
-        $stmt = $this->getConnection()->prepare($query);
-        $stmt->execute(['id' => $id]);
-        $result = $stmt->fetch();
-        return $result ?: null;
+        $params = ['id' => $id];
+        return $this->database->query($query, $params)->fetch();
     }
 
-    public function findAll(string $table, int $limit = 20): array
+    public function findAll(int $limit = 20, int $offset = 0): array
     {
-        $query = "SELECT * FROM $table LIMIT :limit";
-        $stmt = $this->getConnection()->prepare($query);
-        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
-        $stmt->execute();
-        return $stmt->fetchAll() ?: [];
-    }
-
-    public function findBy(string $table, array $params): array
-    {
-        $query = "SELECT * FROM $table WHERE " . implode(" AND ", array_map(fn($key) => "$key = :$key", array_keys($params)));
-        $stmt = $this->getConnection()->prepare($query);
-        foreach ($params as $key => $value) {
-            $stmt->bindValue(":$key", $value);
-        }
-        $stmt->execute();
-        return $stmt->fetchAll();
+        $modelClass = static::getModelClass();
+        $modelInstance = new $modelClass();
+        $table = $modelInstance::getTableName();
+        $query = "SELECT * FROM $table LIMIT :limit OFFSET :offset";
+        $params = ['limit' => $limit, 'offset' => $offset];
+        return $this->database->query($query, $params)->fetchAll();
     }
 
     public function execute(string $query, array $params): bool
     {
-        $stmt = $this->getConnection()->prepare($query);
-        return $stmt->execute($params);
-    }
-
-    public function query(string $query, array $params = []): array
-    {
-        $stmt = $this->getConnection()->prepare($query);
-        $stmt->execute($params);
-        return $stmt->fetchAll() ?: [];
+        return $this->database->execute($query, $params);
     }
 }

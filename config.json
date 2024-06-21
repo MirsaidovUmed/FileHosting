@@ -1,8 +1,17 @@
 {
-    "database": {
-        "host": "localhost",
-        "dbname": "file_hosting",
-        "username": "root",
-        "password": ""
-    }
-}  
+  "database": {
+    "host": "localhost",
+    "dbname": "file_hosting",
+    "username": "root",
+    "password": ""
+  },
+  "repositories": [
+    "App\\Repositories"
+  ],
+  "services": [
+    "App\\Services"
+  ],
+  "controllers": [
+    "App\\Controllers"
+  ]
+}

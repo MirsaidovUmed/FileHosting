@@ -6,67 +6,59 @@ use App\Models\User;
 use DateTime;
 use Exception;
 
-class UserRepository extends Repository implements IUserRepository
+class UserRepository extends Repository
 {
-    protected string $table = 'users';
+    protected static function getModelClass(): string
+    {
+        return User::class;
+    }
 
     /**
      * @throws Exception
      */
     public function findById(int $id): ?User
     {
-        $userData = $this->findOneById($this->table, $id);
+        $userData = $this->findOneById($id);
 
         if ($userData) {
-            $createdDate = isset($userData['created_date']) ? new DateTime($userData['created_date']) : null;
-            return new User(
-                $userData['id'],
-                $userData['login'],
-                $userData['password'],
-                $userData['role'],
-                $createdDate
-            );
+            return $this->deserialize($userData);
         }
 
         return null;
     }
 
-    public function findAllUsers(int $limit = 20): array
+    /**
+     * @throws Exception
+     */
+    public function findAllUsers(int $limit = 20, int $offset = 0): array
     {
-        $userData = $this->findAll($this->table, $limit);
+        $userDataArray = $this->findAll($limit, $offset);
 
-        return array_map(/**
-         * @throws Exception
-         */ function ($user) {
-            $createdDate = isset($user['created_date']) ? new DateTime($user['created_date']) : null;
-            return new User(
-                $user['id'],
-                $user['login'],
-                $user['password'],
-                $user['role'],
-                $createdDate
-            );
-        }, $userData ?: []);
+        return array_map(function ($userData) {
+            return $this->deserialize($userData);
+        }, $userDataArray ?: []);
     }
 
     public function createUser(User $user): bool
     {
-        $query = 'INSERT INTO users (login, password, role) VALUES (:login, :password, :role)';
+        $query = 'INSERT INTO users (login, password, role, created_date) VALUES (:login, :password, :role, :created_date)';
         $params = [
-            'login' => $user->login,
-            'password' => $user->password,
-            'role' => $user->role
+            'login' => $user->getLogin(),
+            'password' => $user->getPassword(),
+            'role' => $user->getRole(),
+            'created_date' => $user->getCreatedDate()?->format('Y-m-d H:i:s')
         ];
         return $this->execute($query, $params);
     }
 
     public function updateUser(int $id, User $user): bool
     {
-        $query = 'UPDATE users SET login = :login, password = :password, role = :role WHERE id = :id';
+        $query = 'UPDATE users SET login = :login, password = :password, role = :role, created_date = :created_date WHERE id = :id';
         $params = [
-            'login' => $user->login,
-            'password' => $user->password,
-            'role' => $user->role,
+            'login' => $user->getLogin(),
+            'password' => $user->getPassword(),
+            'role' => $user->getRole(),
+            'created_date' => $user->getCreatedDate()?->format('Y-m-d H:i:s'),
             'id' => $id
         ];
         return $this->execute($query, $params);

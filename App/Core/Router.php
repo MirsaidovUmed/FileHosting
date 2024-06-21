@@ -18,6 +18,8 @@ class Router
      */
     public function getController(Request $request): array
     {
+        $controllerNamespaces = $this->app->getConfig()->get('controllers');
+
         foreach (Web::URL_LIST as $url => $methodsList) {
             $pattern = preg_replace('/\{[a-zA-Z0-9_]+}/', '([a-zA-Z0-9_]+)', $url);
             if (!preg_match("#^$pattern$#", $request->getUrl(), $matches)) {
@@ -32,17 +34,17 @@ class Router
                 }
 
                 [$controllerClass, $controllerMethod] = explode('::', $actionName);
-                $controllerClass = 'App\\Controllers\\' . $controllerClass;
 
-                if (!class_exists($controllerClass) || !method_exists($controllerClass, $controllerMethod)) {
-                    throw new Exception('Контроллер или метод не найден');
+                foreach ($controllerNamespaces as $namespace) {
+                    $fullControllerClass = $namespace . '\\' . $controllerClass;
+                    if (class_exists($fullControllerClass) && method_exists($fullControllerClass, $controllerMethod)) {
+                        return [
+                            'class' => $fullControllerClass,
+                            'method' => $controllerMethod,
+                            'params' => $matches
+                        ];
+                    }
                 }
-
-                return [
-                    'class' => $controllerClass,
-                    'method' => $controllerMethod,
-                    'params' => $matches
-                ];
             }
         }
 

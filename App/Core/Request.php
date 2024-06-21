@@ -21,13 +21,19 @@ class Request
         }
 
         $this->method = $_SERVER['REQUEST_METHOD'];
-        if (($this->method == 'GET' && isset($_SERVER['CONTENT_TYPE']) && $_SERVER['CONTENT_TYPE'] == 'application/x-www-form-urlencoded')
-            || $this->method == 'PUT' || $this->method == 'DELETE') {
-            $this->params = [];
+        if (
+            (
+                $this->method == 'GET'
+                && isset($_SERVER['CONTENT_TYPE'])
+                && $_SERVER['CONTENT_TYPE'] == 'application/x-www-form-urlencoded'
+            )
+            || $this->method == 'PUT'
+            || $this->method == 'DELETE'
+        ) {
             parse_str(file_get_contents('php://input'), $this->params);
-        } else if ($this->method == "GET") {
+        } elseif ($this->method == "GET") {
             $this->params = $_GET;
-        } else if ($this->method == "POST") {
+        } elseif ($this->method == "POST") {
             $this->params = $_POST;
         }
 

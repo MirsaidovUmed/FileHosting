@@ -13,12 +13,12 @@ class Validator
      */
     public function validate(array $data, array $rules): bool
     {
-        foreach ($rules as $field => $ruleSet){
+        foreach ($rules as $field => $ruleSet) {
             foreach ($ruleSet as $rule) {
                 $method = 'validate' . ucfirst($rule);
-                if(method_exists($this, $method)){
+                if (method_exists($this, $method)) {
                     $this->$method($field, $data[$field] ?? null);
-                }else{
+                } else {
                     throw new Exception("Validation rule $rule does not exist.");
                 }
             }

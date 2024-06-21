@@ -5,9 +5,9 @@ namespace App\Core;
 use PDO;
 use PDOException;
 
-class Database
+class Connection
 {
-    private static ?Database $instance = null;
+    private static ?Connection $instance = null;
     private PDO $conn;
 
     private function __construct(array $config)
@@ -17,7 +17,7 @@ class Database
         $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     }
 
-    public static function getInstance(array $config): Database
+    public static function getInstance(array $config): Connection
     {
         if (self::$instance === null) {
             self::$instance = new self($config);
@@ -28,5 +28,18 @@ class Database
     public function getConnection(): PDO
     {
         return $this->conn;
+    }
+
+    public function query(string $query, array $params = []): \PDOStatement
+    {
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute($params);
+        return $stmt;
+    }
+
+    public function execute(string $query, array $params): bool
+    {
+        $stmt = $this->conn->prepare($query);
+        return $stmt->execute($params);
     }
 }

@@ -5,6 +5,7 @@ namespace App\Repositories;
 use App\Models\User;
 use DateTime;
 use Exception;
+use App\Core\Repository;
 
 class UserRepository extends Repository
 {
@@ -21,6 +22,7 @@ class UserRepository extends Repository
         $userData = $this->findOneById($id);
 
         if ($userData) {
+            $userData['created_date'] = isset($userData['created_date']) ? new DateTime($userData['created_date']) : null;
             return $this->deserialize($userData);
         }
 
@@ -35,6 +37,7 @@ class UserRepository extends Repository
         $userDataArray = $this->findAll($limit, $offset);
 
         return array_map(function ($userData) {
+            $userData['created_date'] = isset($userData['created_date']) ? new DateTime($userData['created_date']) : null;
             return $this->deserialize($userData);
         }, $userDataArray ?: []);
     }

@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Repositories;
+namespace App\Core;
 
-use App\Core\Connection;
 use DateTime;
 use Exception;
+use PDOStatement;
 
 abstract class Repository
 {
@@ -38,7 +38,7 @@ abstract class Repository
         $table = $modelInstance::getTableName();
         $query = "SELECT * FROM $table WHERE id = :id";
         $params = ['id' => $id];
-        return $this->database->query($query, $params)->fetch();
+        return $this->query($query, $params)->fetch();
     }
 
     public function findAll(int $limit = 20, int $offset = 0): array
@@ -48,11 +48,19 @@ abstract class Repository
         $table = $modelInstance::getTableName();
         $query = "SELECT * FROM $table LIMIT :limit OFFSET :offset";
         $params = ['limit' => $limit, 'offset' => $offset];
-        return $this->database->query($query, $params)->fetchAll();
+        return $this->query($query, $params)->fetchAll();
+    }
+
+    public function query(string $query, array $params = []): PDOStatement
+    {
+        $stmt = $this->database->getConnection()->prepare($query);
+        $stmt->execute($params);
+        return $stmt;
     }
 
     public function execute(string $query, array $params): bool
     {
-        return $this->database->execute($query, $params);
+        $stmt = $this->database->getConnection()->prepare($query);
+        return $stmt->execute($params);
     }
 }

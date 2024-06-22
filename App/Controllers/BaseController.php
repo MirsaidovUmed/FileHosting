@@ -3,8 +3,9 @@
 namespace App\Controllers;
 
 use App\Core\App;
-use App\Services\IService;
+use App\Core\IService;
 use Exception;
+
 abstract class BaseController
 {
     protected App $app;

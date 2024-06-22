@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Core\Model;
 use DateTime;
 
 class User extends Model

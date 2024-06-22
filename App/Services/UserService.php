@@ -2,15 +2,16 @@
 
 namespace App\Services;
 
+use App\Core\Service;
 use App\Models\User;
-use App\Repositories\IUserRepository;
+use App\Repositories\UserRepository;
 use Exception;
 
-class UserService extends Service implements IUserService
+class UserService extends Service
 {
-    private IUserRepository $userRepository;
+    private UserRepository $userRepository;
 
-    public function __construct(IUserRepository $userRepository)
+    public function __construct(UserRepository $userRepository)
     {
         $this->userRepository = $userRepository;
         parent::__construct();
@@ -39,15 +40,15 @@ class UserService extends Service implements IUserService
 
         if ($user) {
             if ($login !== null) {
-                $user->login = $login;
+                $user->setLogin($login);
             }
 
             if ($password !== null) {
-                $user->password = $password;
+                $user->setPassword($password);
             }
 
             if ($role !== null) {
-                $user->role = $role;
+                $user->setRole($role);
             }
             return $this->getRepository('User')->updateUser($userId, $user);
         }

@@ -3,7 +3,6 @@
 namespace App\Core;
 
 use PDO;
-use PDOException;
 
 class Connection
 {
@@ -28,18 +27,5 @@ class Connection
     public function getConnection(): PDO
     {
         return $this->conn;
-    }
-
-    public function query(string $query, array $params = []): \PDOStatement
-    {
-        $stmt = $this->conn->prepare($query);
-        $stmt->execute($params);
-        return $stmt;
-    }
-
-    public function execute(string $query, array $params): bool
-    {
-        $stmt = $this->conn->prepare($query);
-        return $stmt->execute($params);
     }
 }

@@ -5,17 +5,21 @@ namespace App\Services;
 use App\Core\AbstractClasses\Service;
 use App\Models\User;
 use App\Repositories\UserRepository;
+use App\Core\Validator;
 use Exception;
 
 class UserService extends Service
 {
     private UserRepository $userRepository;
+    private Validator $validator;
 
-    public function __construct(UserRepository $userRepository)
+    public function __construct(UserRepository $userRepository, Validator $validator)
     {
         $this->userRepository = $userRepository;
+        $this->validator = $validator;
         parent::__construct();
     }
+
 
     protected function initializeRepositories(): void
     {
@@ -25,12 +29,22 @@ class UserService extends Service
     /**
      * @throws Exception
      */
-    public function createUser(string $login, string $password, string $role): bool
+    public function createUser(array $data): bool
     {
+        $rules = [
+            'login' => ['required', 'minLength:10'],
+            'password' => ['required', 'minLength:8'],
+            'role' => ['required']
+        ];
+
+        if (!$this->validator->validate($data, $rules)) {
+            throw new Exception(json_encode($this->validator->getErrors(), JSON_UNESCAPED_UNICODE));
+        }
+
         $user = new User();
-        $user->setLogin($login);
-        $user->setPassword($password);
-        $user->setRole($role);
+        $user->setLogin($data['login']);
+        $user->setPassword($data['password']);
+        $user->setRole($data['role']);
         return $this->userRepository->createUser($user);
     }
 

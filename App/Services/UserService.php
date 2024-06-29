@@ -3,9 +3,9 @@
 namespace App\Services;
 
 use App\Core\AbstractClasses\Service;
+use App\Core\Validator;
 use App\Models\User;
 use App\Repositories\UserRepository;
-use App\Core\Validator;
 use Exception;
 
 class UserService extends Service
@@ -20,7 +20,6 @@ class UserService extends Service
         parent::__construct();
     }
 
-
     protected function initializeRepositories(): void
     {
         $this->repositories['User'] = $this->userRepository;
@@ -32,8 +31,8 @@ class UserService extends Service
     public function createUser(array $data): bool
     {
         $rules = [
-            'login' => ['required', 'minLength:10'],
-            'password' => ['required', 'minLength:8'],
+            'login' => ['required', 'minLength:3'],
+            'password' => ['required', 'minLength:6'],
             'role' => ['required']
         ];
 
@@ -51,21 +50,21 @@ class UserService extends Service
     /**
      * @throws Exception
      */
-    public function updateUser(int $userId, ?string $login = null, ?string $password = null, ?string $role = null): bool
+    public function updateUser(int $userId, array $data): bool
     {
         $user = $this->userRepository->findById($userId);
 
         if ($user) {
-            if ($login !== null) {
-                $user->setLogin($login);
+            if (isset($data['login'])) {
+                $user->setLogin($data['login']);
             }
 
-            if ($password !== null) {
-                $user->setPassword($password);
+            if (isset($data['password'])) {
+                $user->setPassword($data['password']);
             }
 
-            if ($role !== null) {
-                $user->setRole($role);
+            if (isset($data['role'])) {
+                $user->setRole($data['role']);
             }
             return $this->userRepository->updateUser($userId, $user);
         }

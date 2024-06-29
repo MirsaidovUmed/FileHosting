@@ -13,11 +13,12 @@ class UserController extends BaseController
     protected UserService $userService;
 
     /**
+     * Метод для инициализации сервисов
      * @throws Exception
      */
     protected function initializeServices(): void
     {
-        $this->userService = $this->getService(UserService::class);
+        $this->userService = $this->app->getService(UserService::class);
     }
 
     /**
@@ -28,16 +29,11 @@ class UserController extends BaseController
         $this->initializeServices();
         $data = $request->getParams();
 
-        if (!isset($data['login']) || !isset($data['password'])) {
-            return $this->errorResponse('Missing login or password', 400);
-        }
-
-        $success = $this->userService->createUser($data['login'], $data['password'], $data['role'] ?? 'user');
-
-        if ($success) {
+        try {
+            $this->userService->createUser($data);
             return $this->jsonResponse(['message' => 'User created successfully'], 201);
-        } else {
-            return $this->errorResponse('Failed to create user', 500);
+        } catch (Exception $e) {
+            return $this->errorResponse($e->getMessage(), 400);
         }
     }
 
@@ -53,12 +49,11 @@ class UserController extends BaseController
             return $this->errorResponse('User ID is missing', 400);
         }
 
-        $success = $this->userService->updateUser($data['id'], $data['login'] ?? null, $data['password'] ?? null, $data['role'] ?? null);
-
-        if ($success) {
+        try {
+            $this->userService->updateUser($data['id'], $data);
             return $this->jsonResponse(['message' => 'User updated successfully']);
-        } else {
-            return $this->errorResponse('Failed to update user', 500);
+        } catch (Exception $e) {
+            return $this->errorResponse($e->getMessage(), 400);
         }
     }
 

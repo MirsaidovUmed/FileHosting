@@ -2,7 +2,7 @@
 
 namespace App\Controllers;
 
-use App\Core\App;
+use App\Core\AbstractClasses\BaseController;
 use App\Core\Request;
 use App\Core\Response;
 use App\Services\UserService;
@@ -15,10 +15,9 @@ class UserController extends BaseController
     /**
      * @throws Exception
      */
-    public function __construct(App $app)
+    protected function initializeServices(): void
     {
-        parent::__construct($app);
-        $this->userService = $app->getService('UserService');
+        $this->userService = $this->getService(UserService::class);
     }
 
     /**
@@ -26,22 +25,19 @@ class UserController extends BaseController
      */
     public function createUser(Request $request): Response
     {
+        $this->initializeServices();
         $data = $request->getParams();
 
-        if (!isset($data["login"]) || !isset($data['password'])) {
-            return Response::setError(400, 'Missing login or password');
+        if (!isset($data['login']) || !isset($data['password'])) {
+            return $this->errorResponse('Missing login or password', 400);
         }
 
-        $login = $data['login'];
-        $password = $data['password'];
-        $role = $data['role'];
-
-        $success = $this->userService->createUser($login, $password, $role);
+        $success = $this->userService->createUser($data['login'], $data['password'], $data['role'] ?? 'user');
 
         if ($success) {
-            return Response::setOK('User created successfully');
+            return $this->jsonResponse(['message' => 'User created successfully'], 201);
         } else {
-            return Response::setError(500, 'Failed to create user');
+            return $this->errorResponse('Failed to create user', 500);
         }
     }
 
@@ -50,29 +46,19 @@ class UserController extends BaseController
      */
     public function updateUser(Request $request): Response
     {
+        $this->initializeServices();
         $data = $request->getParams();
 
         if (!isset($data['id'])) {
-            return Response::setError(400, 'User ID is missing');
+            return $this->errorResponse('User ID is missing', 400);
         }
 
-        $userId = $data['id'];
-
-        $existingUserData = $this->userService->findById($userId);
-        if (!$existingUserData) {
-            return Response::setError(404, 'User not found');
-        }
-
-        $login = $data['login'] ?? $existingUserData['login'];
-        $password = $data['password'] ?? $existingUserData['password'];
-        $role = $data['role'] ?? $existingUserData['role'];
-
-        $success = $this->userService->updateUser($userId, $login, $password, $role);
+        $success = $this->userService->updateUser($data['id'], $data['login'] ?? null, $data['password'] ?? null, $data['role'] ?? null);
 
         if ($success) {
-            return Response::setOK('User updated successfully');
+            return $this->jsonResponse(['message' => 'User updated successfully']);
         } else {
-            return Response::setError(500, 'Failed to update user');
+            return $this->errorResponse('Failed to update user', 500);
         }
     }
 
@@ -81,19 +67,19 @@ class UserController extends BaseController
      */
     public function getUserById(Request $request): Response
     {
+        $this->initializeServices();
         $data = $request->getParams();
 
         if (!isset($data['id'])) {
-            return Response::setError(400, 'User ID is missing');
+            return $this->errorResponse('User ID is missing', 400);
         }
 
-        $userId = $data['id'];
-        $user = $this->userService->findById($userId);
+        $user = $this->userService->findById($data['id']);
 
         if ($user) {
-            return Response::setData(json_encode($user));
+            return $this->jsonResponse(['user' => $user]);
         } else {
-            return Response::setError(404, 'User not found');
+            return $this->errorResponse('User not found', 404);
         }
     }
 
@@ -102,19 +88,19 @@ class UserController extends BaseController
      */
     public function deleteUser(Request $request): Response
     {
+        $this->initializeServices();
         $data = $request->getParams();
 
         if (!isset($data['id'])) {
-            return Response::setError(400, 'User ID is missing');
+            return $this->errorResponse('User ID is missing', 400);
         }
 
-        $userId = $data['id'];
-        $success = $this->userService->deleteUser($userId);
+        $success = $this->userService->deleteUser($data['id']);
 
         if ($success) {
-            return Response::setOK('User deleted successfully');
+            return $this->jsonResponse(['message' => 'User deleted successfully']);
         } else {
-            return Response::setError(500, 'Failed to delete user');
+            return $this->errorResponse('Failed to delete user', 500);
         }
     }
 }

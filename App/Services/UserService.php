@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Core\Service;
+use App\Core\AbstractClasses\Service;
 use App\Models\User;
 use App\Repositories\UserRepository;
 use Exception;
@@ -27,8 +27,11 @@ class UserService extends Service
      */
     public function createUser(string $login, string $password, string $role): bool
     {
-        $user = new User(null, $login, $password, $role, null);
-        return $this->getRepository('User')->createUser($user);
+        $user = new User();
+        $user->setLogin($login);
+        $user->setPassword($password);
+        $user->setRole($role);
+        return $this->userRepository->createUser($user);
     }
 
     /**
@@ -36,7 +39,7 @@ class UserService extends Service
      */
     public function updateUser(int $userId, ?string $login = null, ?string $password = null, ?string $role = null): bool
     {
-        $user = $this->getRepository('User')->findById($userId);
+        $user = $this->userRepository->findById($userId);
 
         if ($user) {
             if ($login !== null) {
@@ -50,7 +53,7 @@ class UserService extends Service
             if ($role !== null) {
                 $user->setRole($role);
             }
-            return $this->getRepository('User')->updateUser($userId, $user);
+            return $this->userRepository->updateUser($userId, $user);
         }
 
         return false;
@@ -61,7 +64,7 @@ class UserService extends Service
      */
     public function findById(int $userId): ?User
     {
-        return $this->getRepository('User')->findById($userId);
+        return $this->userRepository->findById($userId);
     }
 
     /**
@@ -69,6 +72,6 @@ class UserService extends Service
      */
     public function deleteUser(int $userId): bool
     {
-        return $this->getRepository('User')->deleteUser($userId);
+        return $this->userRepository->deleteUser($userId);
     }
 }

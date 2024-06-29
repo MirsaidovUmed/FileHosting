@@ -2,6 +2,8 @@
 
 namespace App\Core;
 
+use App\Core\DB\Connection;
+use App\Core\Interfaces\IService;
 use Exception;
 use ReflectionClass;
 use ReflectionException;
@@ -28,7 +30,7 @@ class App
      */
     public function initRepositories(): void
     {
-        $repositoryNamespaces = $this->config->get('repositories');
+        $repositoryNamespaces = $this->config->get(Config::REPOSITORIES);
         foreach ($repositoryNamespaces as $repositoryNamespace) {
             foreach (get_declared_classes() as $class) {
                 if (!str_starts_with($class, $repositoryNamespace)) {
@@ -46,7 +48,7 @@ class App
             }
         }
 
-        $databaseConfig = $this->config->get('database');
+        $databaseConfig = $this->config->get(Config::DATABASE);
         $database = Connection::getInstance($databaseConfig);
         foreach ($this->repositories as $repository) {
             $repository->setDatabase($database);
@@ -59,7 +61,7 @@ class App
      */
     public function initServices(): void
     {
-        $serviceNamespaces = $this->config->get('services');
+        $serviceNamespaces = $this->config->get(Config::SERVICES);
         foreach ($serviceNamespaces as $serviceNamespace) {
             foreach (get_declared_classes() as $class) {
                 if (!str_starts_with($class, $serviceNamespace)) {
@@ -67,20 +69,24 @@ class App
                 }
 
                 $reflector = new ReflectionClass($class);
-                if ($reflector->implementsInterface(IService::class) && !$reflector->isAbstract()) {
-                    $constructor = $reflector->getConstructor();
-                    $parameters = $constructor->getParameters();
-                    $dependencies = [];
-                    foreach ($parameters as $parameter) {
-                        $type = $parameter->getType();
-                        if ($type) {
-                            $dependencyClassName = $type->getName();
-                            $dependencies[] = new $dependencyClassName();
-                        }
-                    }
-                    $serviceName = $reflector->getShortName();
-                    $this->services[$serviceName] = $reflector->newInstanceArgs($dependencies);
+                if (!$reflector->implementsInterface(IService::class) || $reflector->isAbstract()) {
+                    continue;
                 }
+
+                $constructor = $reflector->getConstructor();
+                $parameters = $constructor->getParameters();
+                $dependencies = [];
+
+                foreach ($parameters as $parameter) {
+                    $type = $parameter->getType();
+                    if ($type) {
+                        $dependencyClassName = $type->getName();
+                        $dependencies[] = new $dependencyClassName();
+                    }
+                }
+
+                $serviceName = $reflector->getShortName();
+                $this->services[$serviceName] = $reflector->newInstanceArgs($dependencies);
             }
         }
     }

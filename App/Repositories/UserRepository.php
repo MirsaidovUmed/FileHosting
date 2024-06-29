@@ -2,10 +2,10 @@
 
 namespace App\Repositories;
 
+use App\Core\DB\Repository;
 use App\Models\User;
 use DateTime;
 use Exception;
-use App\Core\Repository;
 
 class UserRepository extends Repository
 {

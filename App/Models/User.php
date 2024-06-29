@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Core\Model;
+use App\Core\DB\Model;
 use DateTime;
 
 class User extends Model
@@ -13,14 +13,6 @@ class User extends Model
     private string $role;
     private ?DateTime $createdDate;
 
-    public function __construct(?int $id, string $login, string $password, string $role, ?DateTime $createdDate)
-    {
-        $this->id = $id;
-        $this->login = $login;
-        $this->password = $password;
-        $this->role = $role;
-        $this->createdDate = $createdDate;
-    }
 
     public static function getTableName(): string
     {

@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Core;
+namespace App\Core\DB;
 
 use DateTime;
 use Exception;
 use PDOStatement;
 
-abstract class Repository
+abstract class Repository implements IRepository
 {
     protected Connection $database;
 
@@ -31,21 +31,31 @@ abstract class Repository
         return new $modelClass(...$data);
     }
 
+    /**
+     * @throws Exception
+     */
     public function findOneById(int $id): ?array
     {
         $modelClass = static::getModelClass();
-        $modelInstance = new $modelClass();
-        $table = $modelInstance::getTableName();
+        if (!method_exists($modelClass, 'getTableName')) {
+            throw new Exception("Метод getTableName не найден в классе $modelClass");
+        }
+        $table = $modelClass::getTableName();
         $query = "SELECT * FROM $table WHERE id = :id";
         $params = ['id' => $id];
         return $this->query($query, $params)->fetch();
     }
 
+    /**
+     * @throws Exception
+     */
     public function findAll(int $limit = 20, int $offset = 0): array
     {
         $modelClass = static::getModelClass();
-        $modelInstance = new $modelClass();
-        $table = $modelInstance::getTableName();
+        if (!method_exists($modelClass, 'getTableName')) {
+            throw new Exception("Метод getTableName не найден в классе $modelClass");
+        }
+        $table = $modelClass::getTableName();
         $query = "SELECT * FROM $table LIMIT :limit OFFSET :offset";
         $params = ['limit' => $limit, 'offset' => $offset];
         return $this->query($query, $params)->fetchAll();

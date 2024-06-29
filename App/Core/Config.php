@@ -8,6 +8,10 @@ class Config
 {
     private array $config;
 
+    const SERVICES = 'services';
+    const REPOSITORIES = 'repositories';
+    const DATABASE = 'database';
+
     /**
      * @throws Exception
      */
@@ -30,22 +34,22 @@ class Config
      */
     private function validate(): void
     {
-        $requiredKeys = ['services', 'repositories', 'database'];
+        $requiredKeys = [self::SERVICES, self::REPOSITORIES, self::DATABASE];
         foreach ($requiredKeys as $key) {
             if (!isset($this->config[$key])) {
                 throw new Exception("Отсутствует обязательный ключ конфигурации: $key");
             }
         }
 
-        if (!is_array($this->config['services'])) {
+        if (!is_array($this->config[self::SERVICES])) {
             throw new Exception("Ключ 'services' должен быть массивом");
         }
 
-        if (!is_array($this->config['repositories'])) {
+        if (!is_array($this->config[self::REPOSITORIES])) {
             throw new Exception("Ключ 'repositories' должен быть массивом");
         }
 
-        if (!is_array($this->config['database'])) {
+        if (!is_array($this->config[self::DATABASE])) {
             throw new Exception("Ключ 'database' должен быть массивом");
         }
     }

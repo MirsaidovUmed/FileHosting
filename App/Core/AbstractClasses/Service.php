@@ -1,7 +1,9 @@
 <?php
 
-namespace App\Core;
+namespace App\Core\AbstractClasses;
 
+use App\Core\DB\Repository;
+use App\Core\Interfaces\IService;
 use Exception;
 
 abstract class Service implements IService

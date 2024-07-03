@@ -2,13 +2,12 @@
 
 namespace App\Services;
 
-use App\Core\AbstractClasses\Service;
 use App\Core\Validator;
 use App\Models\User;
 use App\Repositories\UserRepository;
 use Exception;
 
-class UserService extends Service
+class UserService
 {
     private UserRepository $userRepository;
     private Validator $validator;
@@ -17,12 +16,6 @@ class UserService extends Service
     {
         $this->userRepository = $userRepository;
         $this->validator = $validator;
-        parent::__construct();
-    }
-
-    protected function initializeRepositories(): void
-    {
-        $this->repositories['User'] = $this->userRepository;
     }
 
     /**

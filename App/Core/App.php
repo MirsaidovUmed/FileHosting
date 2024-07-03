@@ -2,8 +2,8 @@
 
 namespace App\Core;
 
+use App\Core\AbstractClasses\Service;
 use App\Core\DB\Connection;
-use App\Core\Interfaces\IService;
 use Exception;
 use ReflectionClass;
 use ReflectionException;
@@ -110,7 +110,7 @@ class App
     /**
      * @throws Exception
      */
-    public function getService(string $serviceName): IService
+    public function getService(string $serviceName): Service
     {
         if (!isset($this->services[$serviceName])) {
             throw new Exception("Сервис не найден: " . $serviceName);

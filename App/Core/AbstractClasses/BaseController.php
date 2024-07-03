@@ -3,12 +3,10 @@
 namespace App\Core\AbstractClasses;
 
 use App\Core\App;
-use App\Core\Interfaces\IController;
-use App\Core\Interfaces\IService;
 use App\Core\Response;
 use Exception;
 
-abstract class BaseController implements IController
+abstract class BaseController
 {
     protected App $app;
 
@@ -16,19 +14,6 @@ abstract class BaseController implements IController
     {
         $this->app = $app;
     }
-
-    protected function initializeServices(): void
-    {
-    }
-
-    /**
-     * @throws Exception
-     */
-    protected function getService(string $serviceName): IService
-    {
-        return $this->app->getService($serviceName);
-    }
-
 
     protected function jsonResponse(array $data, int $status = 200): Response
     {

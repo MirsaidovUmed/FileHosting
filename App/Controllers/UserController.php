@@ -5,33 +5,20 @@ namespace App\Controllers;
 use App\Core\AbstractClasses\BaseController;
 use App\Core\Request;
 use App\Core\Response;
+use App\Models\User;
 use App\Services\UserService;
 use Exception;
 
 class UserController extends BaseController
 {
-    protected UserService $userService;
-
-    /**
-     * Метод для инициализации сервисов
-     * @throws Exception
-     */
-    protected function initializeServices(): void
-    {
-        $this->userService = $this->app->getService(UserService::class);
-    }
-
     /**
      * @throws Exception
      */
-    public function createUser(Request $request): Response
+    public function createUser(Request $request, UserService $userService): Response
     {
-        $this->initializeServices();
-        $data = $request->getParams();
-
         try {
-            $this->userService->createUser($data);
-            return $this->jsonResponse(['message' => 'User created successfully'], 201);
+            $userService->createUser($request->getParams());
+            return $this->jsonResponse(['message' => 'Пользователь успешно создан'], 201);
         } catch (Exception $e) {
             return $this->errorResponse($e->getMessage(), 400);
         }
@@ -40,18 +27,17 @@ class UserController extends BaseController
     /**
      * @throws Exception
      */
-    public function updateUser(Request $request): Response
+    public function updateUser(Request $request, UserService $userService): Response
     {
-        $this->initializeServices();
         $data = $request->getParams();
 
         if (!isset($data['id'])) {
-            return $this->errorResponse('User ID is missing', 400);
+            return $this->errorResponse('Идентификатор пользователя отсутствует', 400);
         }
 
         try {
-            $this->userService->updateUser($data['id'], $data);
-            return $this->jsonResponse(['message' => 'User updated successfully']);
+            $userService->updateUser($data['id'], $data);
+            return $this->jsonResponse(['message' => 'Пользователь успешно обновлен']);
         } catch (Exception $e) {
             return $this->errorResponse($e->getMessage(), 400);
         }
@@ -60,42 +46,48 @@ class UserController extends BaseController
     /**
      * @throws Exception
      */
-    public function getUserById(Request $request): Response
+    public function getUserById(Request $request, UserService $userService): Response
     {
-        $this->initializeServices();
         $data = $request->getParams();
 
         if (!isset($data['id'])) {
-            return $this->errorResponse('User ID is missing', 400);
+            return $this->errorResponse('Идентификатор пользователя отсутствует', 400);
         }
 
-        $user = $this->userService->findById($data['id']);
+        try {
+            $user = $userService->findById($data['id']);
 
-        if ($user) {
-            return $this->jsonResponse(['user' => $user]);
-        } else {
-            return $this->errorResponse('User not found', 404);
+            if ($user instanceof User) {
+                return $this->jsonResponse(['user' => $user]);
+            } else {
+                return $this->errorResponse('Пользователь не найден', 404);
+            }
+        } catch (Exception $e) {
+            return $this->errorResponse($e->getMessage(), 400);
         }
     }
 
     /**
      * @throws Exception
      */
-    public function deleteUser(Request $request): Response
+    public function deleteUser(Request $request, UserService $userService): Response
     {
-        $this->initializeServices();
         $data = $request->getParams();
 
         if (!isset($data['id'])) {
-            return $this->errorResponse('User ID is missing', 400);
+            return $this->errorResponse('Идентификатор пользователя отсутствует', 400);
         }
 
-        $success = $this->userService->deleteUser($data['id']);
+        try {
+            $userDeleted = $userService->deleteUser($data['id']);
 
-        if ($success) {
-            return $this->jsonResponse(['message' => 'User deleted successfully']);
-        } else {
-            return $this->errorResponse('Failed to delete user', 500);
+            if ($userDeleted) {
+                return $this->jsonResponse(['message' => 'Пользователь успешно удалён']);
+            } else {
+                return $this->errorResponse('Не удалось удалить пользователя', 500);
+            }
+        } catch (Exception $e) {
+            return $this->errorResponse($e->getMessage(), 400);
         }
     }
 }

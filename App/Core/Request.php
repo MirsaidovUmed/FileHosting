@@ -11,31 +11,20 @@ class Request
     public function setRequestParams(): void
     {
         $urlParams = explode('?', $_SERVER['REQUEST_URI']);
-        $this->url = $urlParams[0];
-        if (str_starts_with($this->url, '/')) {
-            $this->url = substr($this->url, 1);
-        }
+        $this->url = ltrim($urlParams[0], '/');
 
         if (str_starts_with($this->url, 'file/')) {
             $this->url = substr($this->url, 5);
         }
 
         $this->method = $_SERVER['REQUEST_METHOD'];
-        if (
-            (
-                $this->method == 'GET'
-                && isset($_SERVER['CONTENT_TYPE'])
-                && $_SERVER['CONTENT_TYPE'] == 'application/x-www-form-urlencoded'
-            )
-            || $this->method == 'PUT'
-            || $this->method == 'DELETE'
-        ) {
-            parse_str(file_get_contents('php://input'), $this->params);
-        } elseif ($this->method == "GET") {
-            $this->params = $_GET;
-        } elseif ($this->method == "POST") {
-            $this->params = $_POST;
-        }
+
+        match ($this->method) {
+            'GET' => $this->params = $_GET,
+            'POST' => $this->params = $_POST,
+            'PUT', 'DELETE' => parse_str(file_get_contents('php://input'), $this->params),
+            default => $this->params = []
+        };
 
         error_log("Request URL: " . $this->url);
         error_log("Request Method: " . $this->method);

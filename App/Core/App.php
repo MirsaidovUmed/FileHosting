@@ -107,14 +107,14 @@ class App
         }
     }
 
-    /**
-     * @throws Exception
-     */
-    public function getService(string $serviceName): Service
-    {
-        if (!isset($this->services[$serviceName])) {
-            throw new Exception("Сервис не найден: " . $serviceName);
-        }
-        return $this->services[$serviceName];
-    }
+//    /**
+//     * @throws Exception
+//     */
+//    public function getService(string $serviceName): Service
+//    {
+//        if (!isset($this->services[$serviceName])) {
+//            throw new Exception("Сервис не найден: " . $serviceName);
+//        }
+//        return $this->services[$serviceName];
+//    }
 }

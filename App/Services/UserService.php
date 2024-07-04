@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use App\Core\Validator;
 use App\Models\User;
 use App\Repositories\UserRepository;
 use Exception;
@@ -10,12 +9,10 @@ use Exception;
 class UserService
 {
     private UserRepository $userRepository;
-    private Validator $validator;
 
-    public function __construct(UserRepository $userRepository, Validator $validator)
+    public function __construct(UserRepository $userRepository)
     {
         $this->userRepository = $userRepository;
-        $this->validator = $validator;
     }
 
     /**
@@ -23,16 +20,7 @@ class UserService
      */
     public function createUser(array $data): bool
     {
-        $rules = [
-            'login' => ['required', 'minLength:3'],
-            'password' => ['required', 'minLength:6'],
-            'role' => ['required']
-        ];
-
-        if (!$this->validator->validate($data, $rules)) {
-            throw new Exception(json_encode($this->validator->getErrors(), JSON_UNESCAPED_UNICODE));
-        }
-
+        User::validate($data);
         $user = new User();
         $user->setLogin($data['login']);
         $user->setPassword($data['password']);
@@ -45,20 +33,13 @@ class UserService
      */
     public function updateUser(int $userId, array $data): bool
     {
+        User::validate($data);
         $user = $this->userRepository->findById($userId);
 
         if ($user) {
-            if (isset($data['login'])) {
-                $user->setLogin($data['login']);
-            }
-
-            if (isset($data['password'])) {
-                $user->setPassword($data['password']);
-            }
-
-            if (isset($data['role'])) {
-                $user->setRole($data['role']);
-            }
+            $user->setLogin($data['login'] ?? $user->getLogin());
+            $user->setPassword($data['password'] ?? $user->getPassword());
+            $user->setRole($data['role'] ?? $user->getRole());
             return $this->userRepository->updateUser($userId, $user);
         }
 

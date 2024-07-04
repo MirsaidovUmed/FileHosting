@@ -3,7 +3,9 @@
 namespace App\Models;
 
 use App\Core\DB\Model;
+use App\Core\Validator;
 use DateTime;
+use Exception;
 
 class User extends Model
 {
@@ -12,6 +14,19 @@ class User extends Model
     private string $password;
     private string $role;
     private ?DateTime $createdDate;
+
+    private static array $rules = [
+        'login' => ['required', 'minLength:3'],
+        'password' => ['required', 'minLength:6'],
+        'role' => ['required']
+    ];
+
+    private static Validator $validator;
+
+    public function __construct()
+    {
+        self::$validator = new Validator();
+    }
 
 
     public static function getTableName(): string
@@ -67,5 +82,16 @@ class User extends Model
     public function setCreatedDate(?DateTime $createdDate): void
     {
         $this->createdDate = $createdDate;
+    }
+
+    /**
+     * @throws Exception
+     */
+    public static function validate(array $data): bool
+    {
+        if (!self::$validator->validate($data, self::$rules)) {
+            throw new Exception(json_encode(self::$validator->getErrors(), JSON_UNESCAPED_UNICODE));
+        }
+        return true;
     }
 }

@@ -18,20 +18,20 @@ class UserService
     /**
      * @throws Exception
      */
-    public function createUser(array $data): bool
+    public function createUser(array $data): void
     {
         User::validate($data);
         $user = new User();
         $user->setLogin($data['login']);
         $user->setPassword($data['password']);
         $user->setRole($data['role']);
-        return $this->userRepository->createUser($user);
+        $this->userRepository->createUser($user);
     }
 
     /**
      * @throws Exception
      */
-    public function updateUser(int $userId, array $data): bool
+    public function updateUser(int $userId, array $data): void
     {
         User::validate($data);
         $user = $this->userRepository->findById($userId);
@@ -40,10 +40,10 @@ class UserService
             $user->setLogin($data['login'] ?? $user->getLogin());
             $user->setPassword($data['password'] ?? $user->getPassword());
             $user->setRole($data['role'] ?? $user->getRole());
-            return $this->userRepository->updateUser($userId, $user);
+            $this->userRepository->updateUser($userId, $user);
+        } else {
+            throw new Exception("Пользователь не найден.");
         }
-
-        return false;
     }
 
     /**
@@ -57,8 +57,13 @@ class UserService
     /**
      * @throws Exception
      */
-    public function deleteUser(int $userId): bool
+    public function deleteUser(int $userId): void
     {
-        return $this->userRepository->deleteUser($userId);
+        $user = $this->userRepository->findById($userId);
+        if ($user) {
+            $this->userRepository->deleteUser($userId);
+        } else {
+            throw new Exception("Пользователь не найден.");
+        }
     }
 }

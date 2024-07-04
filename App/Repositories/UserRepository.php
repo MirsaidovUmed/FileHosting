@@ -17,7 +17,7 @@ class UserRepository extends Repository
     /**
      * @throws Exception
      */
-    public function createUser(User $user): bool
+    public function createUser(User $user): void
     {
         $query = 'INSERT INTO users (login, password, role) VALUES (:login, :password, :role)';
         $params = [
@@ -25,13 +25,16 @@ class UserRepository extends Repository
             'password' => $user->getPassword(),
             'role' => $user->getRole()
         ];
-        return $this->execute($query, $params);
+        if (!$this->execute($query, $params)) {
+            throw new Exception("Не удалось создать пользователя.");
+        }
     }
+
 
     /**
      * @throws Exception
      */
-    public function updateUser(int $id, User $user): bool
+    public function updateUser(int $id, User $user): void
     {
         $query = 'UPDATE users SET login = :login, password = :password, role = :role WHERE id = :id';
         $params = [
@@ -40,7 +43,9 @@ class UserRepository extends Repository
             'role' => $user->getRole(),
             'id' => $id
         ];
-        return $this->execute($query, $params);
+        if (!$this->execute($query, $params)) {
+            throw new Exception("Не удалось обновить пользователя.");
+        }
     }
 
     /**
@@ -55,10 +60,12 @@ class UserRepository extends Repository
     /**
      * @throws Exception
      */
-    public function deleteUser(int $id): bool
+    public function deleteUser(int $id): void
     {
         $query = 'DELETE FROM users WHERE id = :id';
         $params = ['id' => $id];
-        return $this->execute($query, $params);
+        if (!$this->execute($query, $params)) {
+            throw new Exception("Не удалось удалить пользователя.");
+        }
     }
 }

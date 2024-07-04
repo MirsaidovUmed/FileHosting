@@ -5,7 +5,6 @@ namespace App\Controllers;
 use App\Core\AbstractClasses\BaseController;
 use App\Core\Request;
 use App\Core\Response;
-use App\Models\User;
 use App\Services\UserService;
 use Exception;
 
@@ -20,7 +19,12 @@ class UserController extends BaseController
             $userService->createUser($request->getParams());
             return $this->jsonResponse(['message' => 'Пользователь успешно создан'], 200);
         } catch (Exception $e) {
-            return $this->errorResponse($e->getMessage(), 400);
+            $errorData = json_decode($e->getMessage(), true);
+            if (json_last_error() === JSON_ERROR_NONE) {
+                return $this->jsonResponse(['errors' => $errorData], 400);
+            } else {
+                return $this->errorResponse($e->getMessage(), 400);
+            }
         }
     }
 
@@ -37,9 +41,14 @@ class UserController extends BaseController
 
         try {
             $userService->updateUser($data['id'], $data);
-            return $this->jsonResponse(['message' => 'Пользователь успешно обновлен']);
+            return $this->jsonResponse(['message' => 'Пользователь успешно обновлен'], 200);
         } catch (Exception $e) {
-            return $this->errorResponse($e->getMessage(), 400);
+            $errorData = json_decode($e->getMessage(), true);
+            if (json_last_error() === JSON_ERROR_NONE) {
+                return $this->jsonResponse(['errors' => $errorData], 400);
+            } else {
+                return $this->errorResponse($e->getMessage(), 400);
+            }
         }
     }
 
@@ -57,7 +66,7 @@ class UserController extends BaseController
         try {
             $user = $userService->findById($data['id']);
 
-            if ($user instanceof User) {
+            if ($user) {
                 return $this->jsonResponse(['user' => $user]);
             } else {
                 return $this->errorResponse('Пользователь не найден', 404);
@@ -79,13 +88,8 @@ class UserController extends BaseController
         }
 
         try {
-            $userDeleted = $userService->deleteUser($data['id']);
-
-            if ($userDeleted) {
-                return $this->jsonResponse(['message' => 'Пользователь успешно удалён']);
-            } else {
-                return $this->errorResponse('Не удалось удалить пользователя', 500);
-            }
+            $userService->deleteUser($data['id']);
+            return $this->jsonResponse(['message' => 'Пользователь успешно удалён'], 200);
         } catch (Exception $e) {
             return $this->errorResponse($e->getMessage(), 400);
         }

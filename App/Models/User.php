@@ -28,7 +28,6 @@ class User extends Model
         self::$validator = new Validator();
     }
 
-
     public static function getTableName(): string
     {
         return 'users';

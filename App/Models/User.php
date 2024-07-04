@@ -15,19 +15,6 @@ class User extends Model
     private string $role;
     private ?DateTime $createdDate;
 
-    private static array $rules = [
-        'login' => ['required', 'minLength:3'],
-        'password' => ['required', 'minLength:6'],
-        'role' => ['required']
-    ];
-
-    private static Validator $validator;
-
-    public function __construct()
-    {
-        self::$validator = new Validator();
-    }
-
     public static function getTableName(): string
     {
         return 'users';
@@ -71,26 +58,5 @@ class User extends Model
     public function setRole(string $role): void
     {
         $this->role = $role;
-    }
-
-    public function getCreatedDate(): ?DateTime
-    {
-        return $this->createdDate;
-    }
-
-    public function setCreatedDate(?DateTime $createdDate): void
-    {
-        $this->createdDate = $createdDate;
-    }
-
-    /**
-     * @throws Exception
-     */
-    public static function validate(array $data): bool
-    {
-        if (!self::$validator->validate($data, self::$rules)) {
-            throw new Exception(json_encode(self::$validator->getErrors(), JSON_UNESCAPED_UNICODE));
-        }
-        return true;
     }
 }

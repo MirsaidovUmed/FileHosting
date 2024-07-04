@@ -10,12 +10,19 @@ use Exception;
 
 class UserController extends BaseController
 {
+    private static array $validationRules = [
+        'login' => ['required', 'minLength:3'],
+        'password' => ['required', 'minLength:6'],
+        'role' => ['required']
+    ];
+
     /**
      * @throws Exception
      */
     public function createUser(Request $request, UserService $userService): Response
     {
         try {
+            $request->validate(self::$validationRules);
             $userService->createUser($request->getParams());
             return $this->jsonResponse(['message' => 'Пользователь успешно создан'], 200);
         } catch (Exception $e) {
@@ -40,6 +47,7 @@ class UserController extends BaseController
         }
 
         try {
+            $request->validate(self::$validationRules);
             $userService->updateUser($data['id'], $data);
             return $this->jsonResponse(['message' => 'Пользователь успешно обновлен'], 200);
         } catch (Exception $e) {
@@ -67,7 +75,7 @@ class UserController extends BaseController
             $user = $userService->findById($data['id']);
 
             if ($user) {
-                return $this->jsonResponse(['user' => $user]);
+                return $this->jsonResponse(['user' => $user], 200);
             } else {
                 return $this->errorResponse('Пользователь не найден', 404);
             }

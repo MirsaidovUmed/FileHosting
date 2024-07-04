@@ -3,9 +3,7 @@
 namespace App\Models;
 
 use App\Core\DB\Model;
-use App\Core\Validator;
 use DateTime;
-use Exception;
 
 class User extends Model
 {

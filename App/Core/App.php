@@ -2,7 +2,6 @@
 
 namespace App\Core;
 
-use App\Core\AbstractClasses\Service;
 use App\Core\DB\Connection;
 use Exception;
 use ReflectionClass;
@@ -69,7 +68,7 @@ class App
                 }
 
                 $reflector = new ReflectionClass($class);
-                if (!$reflector->implementsInterface(IService::class) || $reflector->isAbstract()) {
+                if ($reflector->isAbstract()) {
                     continue;
                 }
 
@@ -81,7 +80,11 @@ class App
                     $type = $parameter->getType();
                     if ($type) {
                         $dependencyClassName = $type->getName();
-                        $dependencies[] = new $dependencyClassName();
+                        if (isset($this->repositories[$dependencyClassName])) {
+                            $dependencies[] = $this->repositories[$dependencyClassName];
+                        } else {
+                            $dependencies[] = new $dependencyClassName();
+                        }
                     }
                 }
 
@@ -99,22 +102,14 @@ class App
             $controllerMethod = $controllerInfo['method'];
             $params = $controllerInfo['params'];
 
-            $controller = new $controllerClass($this);
+            $serviceName = str_replace('Controller', 'Service', $controllerClass);
+            $service = $this->services[$serviceName] ?? null;
+
+            $controller = new $controllerClass($request, $service);
             $request->setParams(array_merge($request->getParams(), $params));
-            return $controller->$controllerMethod($request);
+            return $controller->$controllerMethod($request, $service);
         } catch (Exception $e) {
-            return Response::setError(500, 'Ошибка сервера: ' . $e->getMessage());
+            return new Response('Ошибка сервера: ' . $e->getMessage(), 500);
         }
     }
-
-//    /**
-//     * @throws Exception
-//     */
-//    public function getService(string $serviceName): Service
-//    {
-//        if (!isset($this->services[$serviceName])) {
-//            throw new Exception("Сервис не найден: " . $serviceName);
-//        }
-//        return $this->services[$serviceName];
-//    }
 }

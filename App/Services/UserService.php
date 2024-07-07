@@ -20,7 +20,6 @@ class UserService
      */
     public function createUser(array $data): void
     {
-        User::validate($data);
         $user = new User();
         $user->setLogin($data['login']);
         $user->setPassword($data['password']);
@@ -33,7 +32,6 @@ class UserService
      */
     public function updateUser(int $userId, array $data): void
     {
-        User::validate($data);
         $user = $this->userRepository->findById($userId);
 
         if ($user) {

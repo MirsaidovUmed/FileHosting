@@ -20,16 +20,16 @@ class ComposerStaticInit4191fa10878fba9e4cb77131ecc00681
     public static $prefixDirsPsr4 = array (
         'Config\\' => 
         array (
-            0 => __DIR__ . '\..\..' . '\Config',
+            0 => __DIR__ . '/../..' . '/App/Core',
         ),
         'App\\' => 
         array (
-            0 => __DIR__ . '\..\..' . '\App',
+            0 => __DIR__ . '/../..' . '/App',
         ),
     );
 
     public static $classMap = array (
-        'Composer\\InstalledVersions' => __DIR__ . '\..' . '\composer\InstalledVersions.php',
+        'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
     );
 
     public static function getInitializer(ClassLoader $loader)

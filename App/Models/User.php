@@ -11,7 +11,6 @@ class User extends Model
     private string $login;
     private string $password;
     private string $role;
-    private ?DateTime $createdDate;
 
     public static function getTableName(): string
     {

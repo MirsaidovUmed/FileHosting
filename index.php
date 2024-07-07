@@ -7,6 +7,7 @@ ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
 use App\Core\App;
+use App\Core\Validator;
 use App\Core\Request;
 use App\Core\Config;
 
@@ -18,7 +19,8 @@ $app->initConfig($config);
 $app->initRepositories();
 $app->initServices();
 
-$request = new Request();
+$validator = new Validator();
+$request = new Request($validator);
 $request->setRequestParams();
 
 $response = $app->handleRequest($request);

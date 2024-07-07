@@ -28,7 +28,6 @@ class Config
     }
 
     /**
-     * Метод для валидации конфигурации
      *
      * @throws Exception
      */

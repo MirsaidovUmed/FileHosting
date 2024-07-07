@@ -19,10 +19,19 @@ class UserController extends BaseController
     /**
      * @throws Exception
      */
+    public function __construct(Request $request)
+    {
+        if (!$request->validate(self::$validationRules)) {
+            throw new Exception(json_encode($request->getValidationErrors(), JSON_UNESCAPED_UNICODE));
+        }
+    }
+
+    /**
+     * @throws Exception
+     */
     public function createUser(Request $request, UserService $userService): Response
     {
         try {
-            $request->validate(self::$validationRules);
             $userService->createUser($request->getParams());
             return $this->jsonResponse(['message' => 'Пользователь успешно создан'], 200);
         } catch (Exception $e) {
@@ -47,7 +56,6 @@ class UserController extends BaseController
         }
 
         try {
-            $request->validate(self::$validationRules);
             $userService->updateUser($data['id'], $data);
             return $this->jsonResponse(['message' => 'Пользователь успешно обновлен'], 200);
         } catch (Exception $e) {

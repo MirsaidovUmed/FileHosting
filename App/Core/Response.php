@@ -7,10 +7,10 @@ class Response
     private int $responseCode;
     private string $responseData;
 
-    public function __construct(int $responseCode, string $responseData)
+    public function __construct( string $responseData, int $responseCode)
     {
-        $this->responseCode = $responseCode;
         $this->responseData = $responseData;
+        $this->responseCode = $responseCode;
     }
 
     public static function setOK(string $responseData = 'OK'): Response

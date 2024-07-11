@@ -10,29 +10,30 @@ use Exception;
 
 class UserController extends BaseController
 {
-    private static array $validationRules = [
-        'login' => ['required', 'minLength:3'],
-        'password' => ['required', 'minLength:6'],
-        'role' => ['required']
-    ];
+    private UserService $userService;
 
-    /**
-     * @throws Exception
-     */
-    public function __construct(Request $request)
+    public function __construct(UserService $userService)
     {
-        if (!$request->validate(self::$validationRules)) {
-            throw new Exception(json_encode($request->getValidationErrors(), JSON_UNESCAPED_UNICODE));
-        }
+        $this->userService = $userService;
     }
 
     /**
      * @throws Exception
      */
-    public function createUser(Request $request, UserService $userService): Response
+    public function createUser(Request $request): Response
     {
+        $validationRules = [
+            'login' => ['required', 'minLength:3'],
+            'password' => ['required', 'minLength:6'],
+            'role' => ['required']
+        ];
+
+        if (!$request->validate($validationRules)) {
+            return $this->jsonResponse(['errors' => $request->getValidationErrors()], 400);
+        }
+
         try {
-            $userService->createUser($request->getParams());
+            $this->userService->createUser($request->getParams());
             return $this->jsonResponse(['message' => 'Пользователь успешно создан'], 200);
         } catch (Exception $e) {
             $errorData = json_decode($e->getMessage(), true);
@@ -47,16 +48,23 @@ class UserController extends BaseController
     /**
      * @throws Exception
      */
-    public function updateUser(Request $request, UserService $userService): Response
+    public function updateUser(Request $request): Response
     {
-        $data = $request->getParams();
+        $validationRules = [
+            'id' => ['required', 'integer'],
+            'login' => ['required', 'minLength:3'],
+            'password' => ['required', 'minLength:6'],
+            'role' => ['required']
+        ];
 
-        if (!isset($data['id'])) {
-            return $this->errorResponse('Идентификатор пользователя отсутствует', 400);
+        if (!$request->validate($validationRules)) {
+            return $this->jsonResponse(['errors' => $request->getValidationErrors()], 400);
         }
 
+        $data = $request->getParams();
+
         try {
-            $userService->updateUser($data['id'], $data);
+            $this->userService->updateUser($data['id'], $data);
             return $this->jsonResponse(['message' => 'Пользователь успешно обновлен'], 200);
         } catch (Exception $e) {
             $errorData = json_decode($e->getMessage(), true);
@@ -71,16 +79,20 @@ class UserController extends BaseController
     /**
      * @throws Exception
      */
-    public function getUserById(Request $request, UserService $userService): Response
+    public function getUserById(Request $request): Response
     {
-        $data = $request->getParams();
+        $validationRules = [
+            'id' => ['required', 'integer']
+        ];
 
-        if (!isset($data['id'])) {
-            return $this->errorResponse('Идентификатор пользователя отсутствует', 400);
+        if (!$request->validate($validationRules)) {
+            return $this->jsonResponse(['errors' => $request->getValidationErrors()], 400);
         }
 
+        $data = $request->getParams();
+
         try {
-            $user = $userService->findById($data['id']);
+            $user = $this->userService->findById($data['id']);
 
             if ($user) {
                 return $this->jsonResponse(['user' => $user], 200);
@@ -95,16 +107,20 @@ class UserController extends BaseController
     /**
      * @throws Exception
      */
-    public function deleteUser(Request $request, UserService $userService): Response
+    public function deleteUser(Request $request): Response
     {
-        $data = $request->getParams();
+        $validationRules = [
+            'id' => ['required', 'integer']
+        ];
 
-        if (!isset($data['id'])) {
-            return $this->errorResponse('Идентификатор пользователя отсутствует', 400);
+        if (!$request->validate($validationRules)) {
+            return $this->jsonResponse(['errors' => $request->getValidationErrors()], 400);
         }
 
+        $data = $request->getParams();
+
         try {
-            $userService->deleteUser($data['id']);
+            $this->userService->deleteUser($data['id']);
             return $this->jsonResponse(['message' => 'Пользователь успешно удалён'], 200);
         } catch (Exception $e) {
             return $this->errorResponse($e->getMessage(), 400);

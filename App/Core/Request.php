@@ -2,18 +2,14 @@
 
 namespace App\Core;
 
-use Exception;
-
 class Request
 {
     private string $url;
     private string $method;
     private array $params;
-    private Validator $validator;
 
-    public function __construct(Validator $validator)
+    public function __construct()
     {
-        $this->validator = $validator;
         $this->setRequestParams();
     }
 
@@ -58,18 +54,5 @@ class Request
     public function setParams(array $params): void
     {
         $this->params = $params;
-    }
-
-    /**
-     * @throws Exception
-     */
-    public function validate(array $rules): bool
-    {
-        return $this->validator->validate($this->params, $rules);
-    }
-
-    public function getValidationErrors(): array
-    {
-        return $this->validator->getErrors();
     }
 }

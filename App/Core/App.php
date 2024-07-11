@@ -12,6 +12,7 @@ class App
     private array $services = [];
     private array $repositories = [];
     private Config $config;
+    private Validator $validator;
 
     public function initConfig(Config $config): void
     {
@@ -21,6 +22,11 @@ class App
     public function getConfig(): Config
     {
         return $this->config;
+    }
+
+    public function __construct(Validator $validator)
+    {
+        $this->validator = $validator;
     }
 
     /**
@@ -102,12 +108,27 @@ class App
             $controllerMethod = $controllerInfo['method'];
             $params = $controllerInfo['params'];
 
-            $serviceName = str_replace('Controller', 'Service', $controllerClass);
-            $service = $this->services[$serviceName] ?? null;
+            $reflector = new ReflectionClass($controllerClass);
+            $constructor = $reflector->getConstructor();
+            $dependencies = [];
 
-            $controller = new $controllerClass($request, $service);
+            foreach ($constructor->getParameters() as $parameter) {
+                $type = $parameter->getType();
+                if ($type) {
+                    $dependencyClassName = $type->getName();
+                    if ($dependencyClassName === Request::class) {
+                        $dependencies[] = $request;
+                    } elseif (isset($this->services[$dependencyClassName])) {
+                        $dependencies[] = $this->services[$dependencyClassName];
+                    } else {
+                        throw new Exception("Dependency {$dependencyClassName} not found.");
+                    }
+                }
+            }
+
+            $controller = $reflector->newInstanceArgs($dependencies);
             $request->setParams(array_merge($request->getParams(), $params));
-            return $controller->$controllerMethod($request, $service);
+            return $controller->$controllerMethod($request);
         } catch (Exception $e) {
             return new Response('Ошибка сервера: ' . $e->getMessage(), 500);
         }

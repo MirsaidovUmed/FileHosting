@@ -34,15 +34,65 @@ abstract class Repository implements IRepository
     /**
      * @throws Exception
      */
+    public function find(int $id): ?array
+    {
+        return $this->findOneById($id);
+    }
+
+    /**
+     * @throws Exception
+     */
     public function findOneById(int $id): ?array
     {
         $modelClass = static::getModelClass();
         if (!method_exists($modelClass, 'getTableName')) {
             throw new Exception("Метод getTableName не найден в классе $modelClass");
         }
+
         $table = $modelClass::getTableName();
         $query = "SELECT * FROM $table WHERE id = :id";
         $params = ['id' => $id];
+
+        return $this->query($query, $params)->fetch();
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function findBy(array $criteria, array $sort = [], int $limit = 20, int $offset = 0): ?array
+    {
+        $modelClass = static::getModelClass();
+        if (!method_exists($modelClass, 'getTableName')) {
+            throw new Exception("Метод getTableName не найден в классе $modelClass");
+        }
+
+        $table = $modelClass::getTableName();
+        $whereClause = $this->buildWhereClause($criteria);
+        $orderClause = $this->buildOrderClause($sort);
+
+        $query = "SELECT * FROM $table $whereClause $orderClause LIMIT :limit OFFSET :offset";
+        $params = array_merge($criteria, ['limit' => $limit, 'offset' => $offset]);
+
+        return $this->query($query, $params)->fetchAll();
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function findOneBy(array $criteria, array $sort = []): ?array
+    {
+        $modelClass = static::getModelClass();
+        if (!method_exists($modelClass, 'getTableName')) {
+            throw new Exception("Метод getTableName не найден в классе $modelClass");
+        }
+
+        $table = $modelClass::getTableName();
+        $whereClause = $this->buildWhereClause($criteria);
+        $orderClause = $this->buildOrderClause($sort);
+
+        $query = "SELECT * FROM $table $whereClause $orderClause LIMIT 1";
+        $params = $criteria;
+
         return $this->query($query, $params)->fetch();
     }
 
@@ -55,13 +105,15 @@ abstract class Repository implements IRepository
         if (!method_exists($modelClass, 'getTableName')) {
             throw new Exception("Метод getTableName не найден в классе $modelClass");
         }
+
         $table = $modelClass::getTableName();
         $query = "SELECT * FROM $table LIMIT :limit OFFSET :offset";
         $params = ['limit' => $limit, 'offset' => $offset];
+
         return $this->query($query, $params)->fetchAll();
     }
 
-    public function query(string $query, array $params = []): PDOStatement
+    private function query(string $query, array $params = []): PDOStatement
     {
         $stmt = $this->database->getConnection()->prepare($query);
         $stmt->execute($params);
@@ -72,5 +124,33 @@ abstract class Repository implements IRepository
     {
         $stmt = $this->database->getConnection()->prepare($query);
         return $stmt->execute($params);
+    }
+
+    private function buildWhereClause(array $criteria): string
+    {
+        if (empty($criteria)) {
+            return '';
+        }
+
+        $where = [];
+        foreach ($criteria as $key => $value) {
+            $where[] = "$key = :$key";
+        }
+
+        return 'WHERE ' . implode(' AND ', $where);
+    }
+
+    private function buildOrderClause(array $sort): string
+    {
+        if (empty($sort)) {
+            return '';
+        }
+
+        $order = [];
+        foreach ($sort as $key => $value) {
+            $order[] = "$key $value";
+        }
+
+        return 'ORDER BY ' . implode(', ', $order);
     }
 }

@@ -1,6 +1,6 @@
 <?php
 
-require_once __DIR__ . "/vendor/autoload.php";
+require_once "autoload.php";
 
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
@@ -14,13 +14,13 @@ use App\Core\Config;
 $config = new Config();
 $config->load(__DIR__ . "/config.json");
 
-$app = new App();
+$validator = new Validator();
+$app = new App($validator);
 $app->initConfig($config);
 $app->initRepositories();
 $app->initServices();
 
-$validator = new Validator();
-$request = new Request($validator);
+$request = new Request();
 $request->setRequestParams();
 
 $response = $app->handleRequest($request);

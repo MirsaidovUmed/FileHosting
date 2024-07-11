@@ -14,6 +14,11 @@ class App
     private Config $config;
     private Validator $validator;
 
+    public function __construct(Validator $validator)
+    {
+        $this->validator = $validator;
+    }
+
     public function initConfig(Config $config): void
     {
         $this->config = $config;
@@ -22,11 +27,6 @@ class App
     public function getConfig(): Config
     {
         return $this->config;
-    }
-
-    public function __construct(Validator $validator)
-    {
-        $this->validator = $validator;
     }
 
     /**
@@ -94,7 +94,7 @@ class App
                     }
                 }
 
-                $serviceName = $reflector->getShortName();
+                $serviceName = $reflector->getName();
                 $this->services[$serviceName] = $reflector->newInstanceArgs($dependencies);
             }
         }
@@ -108,29 +108,65 @@ class App
             $controllerMethod = $controllerInfo['method'];
             $params = $controllerInfo['params'];
 
-            $reflector = new ReflectionClass($controllerClass);
-            $constructor = $reflector->getConstructor();
-            $dependencies = [];
+            $validationRules = $controllerClass::getValidationRules($controllerMethod);
 
-            foreach ($constructor->getParameters() as $parameter) {
-                $type = $parameter->getType();
-                if ($type) {
-                    $dependencyClassName = $type->getName();
-                    if ($dependencyClassName === Request::class) {
-                        $dependencies[] = $request;
-                    } elseif (isset($this->services[$dependencyClassName])) {
-                        $dependencies[] = $this->services[$dependencyClassName];
-                    } else {
-                        throw new Exception("Dependency {$dependencyClassName} not found.");
-                    }
-                }
+            if (!$this->validateRequest($request, $validationRules)) {
+                return new Response(json_encode(['errors' => $this->validator->getErrors()]), 400);
             }
 
-            $controller = $reflector->newInstanceArgs($dependencies);
+            $controller = $this->createController($controllerClass);
+
             $request->setParams(array_merge($request->getParams(), $params));
+
             return $controller->$controllerMethod($request);
         } catch (Exception $e) {
             return new Response('Ошибка сервера: ' . $e->getMessage(), 500);
         }
+    }
+
+    /**
+     * @throws ReflectionException
+     * @throws Exception
+     */
+    private function createController(string $controllerClass): object
+    {
+        $dependencies = $this->getServiceForController($controllerClass);
+        $reflector = new ReflectionClass($controllerClass);
+        return $reflector->newInstanceArgs($dependencies);
+    }
+
+    /**
+     * @throws ReflectionException
+     * @throws Exception
+     */
+    private function getServiceForController(string $controllerClass): array
+    {
+        $reflector = new ReflectionClass($controllerClass);
+        $constructor = $reflector->getConstructor();
+        $dependencies = [];
+
+        if ($constructor) {
+            foreach ($constructor->getParameters() as $parameter) {
+                $type = $parameter->getType();
+                if ($type && !$type->isBuiltin()) {
+                    $dependencyClassName = $type->getName();
+                    if (isset($this->services[$dependencyClassName])) {
+                        $dependencies[] = $this->services[$dependencyClassName];
+                    } else {
+                        throw new Exception("Service $dependencyClassName not found for controller $controllerClass");
+                    }
+                }
+            }
+        }
+
+        return $dependencies;
+    }
+
+    /**
+     * @throws Exception
+     */
+    private function validateRequest(Request $request, array $rules): bool
+    {
+        return $this->validator->validate($request->getParams(), $rules);
     }
 }

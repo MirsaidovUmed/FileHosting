@@ -17,24 +17,32 @@ class UserController extends BaseController
         $this->userService = $userService;
     }
 
-    /**
-     * @throws Exception
-     */
+    public static function getValidationRules(string $method): array
+    {
+        return match ($method) {
+            'createUser' => [
+                'login' => ['required', 'minLength:3'],
+                'password' => ['required', 'minLength:6'],
+                'role' => ['required']
+            ],
+            'updateUser' => [
+                'id' => ['required', 'integer'],
+                'login' => ['required', 'minLength:3'],
+                'password' => ['required', 'minLength:6'],
+                'role' => ['required']
+            ],
+            'getUserById', 'deleteUser' => [
+                'id' => ['required', 'integer']
+            ],
+            default => []
+        };
+    }
+
     public function createUser(Request $request): Response
     {
-        $validationRules = [
-            'login' => ['required', 'minLength:3'],
-            'password' => ['required', 'minLength:6'],
-            'role' => ['required']
-        ];
-
-        if (!$request->validate($validationRules)) {
-            return $this->jsonResponse(['errors' => $request->getValidationErrors()], 400);
-        }
-
         try {
             $this->userService->createUser($request->getParams());
-            return $this->jsonResponse(['message' => 'Пользователь успешно создан'], 200);
+            return $this->jsonResponse(['message' => 'Пользователь успешно создан'], 201);
         } catch (Exception $e) {
             $errorData = json_decode($e->getMessage(), true);
             if (json_last_error() === JSON_ERROR_NONE) {
@@ -45,22 +53,8 @@ class UserController extends BaseController
         }
     }
 
-    /**
-     * @throws Exception
-     */
     public function updateUser(Request $request): Response
     {
-        $validationRules = [
-            'id' => ['required', 'integer'],
-            'login' => ['required', 'minLength:3'],
-            'password' => ['required', 'minLength:6'],
-            'role' => ['required']
-        ];
-
-        if (!$request->validate($validationRules)) {
-            return $this->jsonResponse(['errors' => $request->getValidationErrors()], 400);
-        }
-
         $data = $request->getParams();
 
         try {
@@ -76,19 +70,8 @@ class UserController extends BaseController
         }
     }
 
-    /**
-     * @throws Exception
-     */
     public function getUserById(Request $request): Response
     {
-        $validationRules = [
-            'id' => ['required', 'integer']
-        ];
-
-        if (!$request->validate($validationRules)) {
-            return $this->jsonResponse(['errors' => $request->getValidationErrors()], 400);
-        }
-
         $data = $request->getParams();
 
         try {
@@ -104,19 +87,8 @@ class UserController extends BaseController
         }
     }
 
-    /**
-     * @throws Exception
-     */
     public function deleteUser(Request $request): Response
     {
-        $validationRules = [
-            'id' => ['required', 'integer']
-        ];
-
-        if (!$request->validate($validationRules)) {
-            return $this->jsonResponse(['errors' => $request->getValidationErrors()], 400);
-        }
-
         $data = $request->getParams();
 
         try {

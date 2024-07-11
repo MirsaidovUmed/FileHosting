@@ -6,6 +6,7 @@ use App\Core\DB\Connection;
 use Exception;
 use ReflectionClass;
 use ReflectionException;
+use ReflectionMethod;
 
 class App
 {
@@ -118,7 +119,10 @@ class App
 
             $request->setParams(array_merge($request->getParams(), $params));
 
-            return $controller->$controllerMethod($request);
+            $method = new ReflectionMethod($controller, $controllerMethod);
+            $dependencies = $this->getMethodDependencies($method);
+
+            return $method->invokeArgs($controller, array_merge([$request], $dependencies));
         } catch (Exception $e) {
             return new Response('Ошибка сервера: ' . $e->getMessage(), 500);
         }
@@ -159,6 +163,29 @@ class App
             }
         }
 
+        return $dependencies;
+    }
+
+    /**
+     * @throws ReflectionException
+     * @throws Exception
+     */
+    private function getMethodDependencies(ReflectionMethod $method): array
+    {
+        $dependencies = [];
+        foreach ($method->getParameters() as $parameter) {
+            $type = $parameter->getType();
+            if ($type && !$type->isBuiltin()) {
+                $dependencyClassName = $type->getName();
+                if (isset($this->services[$dependencyClassName])) {
+                    $dependencies[] = $this->services[$dependencyClassName];
+                } else {
+                    throw new Exception("Service $dependencyClassName not found for method {$method->getName()}");
+                }
+            } else {
+                $dependencies[] = null;
+            }
+        }
         return $dependencies;
     }
 

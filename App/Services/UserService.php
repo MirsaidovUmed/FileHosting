@@ -52,6 +52,11 @@ class UserService
         return $this->userRepository->findById($userId);
     }
 
+    public function findAll(int $limit, int $offset): array
+    {
+        $return $this->userRepository->findAll($limit, $offset);
+    }
+
     /**
      * @throws Exception
      */

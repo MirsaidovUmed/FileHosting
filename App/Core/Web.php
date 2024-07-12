@@ -12,6 +12,9 @@ class Web
         ],
         'user' => [
             'POST' => 'UserController::createUser',
+        ],
+        'user/list' => [
+            'GET' => 'UserController::getUserList',
         ]
     ];
 }

@@ -34,6 +34,10 @@ class UserController extends BaseController
             'getUserById', 'deleteUser' => [
                 'id' => ['required', 'integer']
             ],
+            'getUserList' => [
+                'limit' => ['required', 'integer'],
+                'offset' => ['required', 'integer']
+            ] ,
             default => []
         };
     }
@@ -87,6 +91,25 @@ class UserController extends BaseController
         }
     }
 
+    public function getUserList(Request $request): Response
+    {
+        if (!$request->validate($validationRules)) {
+            return $this->jsonResponse(['errors' => $request->getValidationErrors()], 400);
+        }
+
+        $data = $request->getParams();
+
+        try {
+            $users = $this->userService->findAll($data['limit'], $data['offset']);
+            return $this->jsonResponse(['users' => $users], 200);
+        } catch (Exception $e) {
+            return $this->errorResponse($e->getMessage(), 400);
+        }
+    }
+
+    /**
+     * @throws Exception
+     */
     public function deleteUser(Request $request): Response
     {
         $data = $request->getParams();

@@ -89,6 +89,15 @@ class UserRepository extends Repository
     /**
      * @throws Exception
      */
+    public function findAll(int $limit = 20, int $offset = 0): array
+    {
+        $results = parent::findAll($limit, $offset);
+        return array_map([$this, 'deserialize'], $results);
+    }
+
+    /**
+     * @throws Exception
+     */
     protected function deserialize(array $data): User
     {
         return new User(

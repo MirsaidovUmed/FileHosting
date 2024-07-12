@@ -15,28 +15,24 @@ class UserService
         $this->userRepository = $userRepository;
     }
 
-    /**
-     * @throws Exception
-     */
     public function createUser(array $data): void
     {
         $user = new User();
         $user->setLogin($data['login']);
-        $user->setPassword($data['password']);
+        $user->setPassword(password_hash($data['password'], PASSWORD_BCRYPT));
         $user->setRole($data['role']);
         $this->userRepository->createUser($user);
     }
 
-    /**
-     * @throws Exception
-     */
     public function updateUser(int $userId, array $data): void
     {
         $user = $this->userRepository->findById($userId);
 
         if ($user) {
             $user->setLogin($data['login'] ?? $user->getLogin());
-            $user->setPassword($data['password'] ?? $user->getPassword());
+            if (isset($data['password'])) {
+                $user->setPassword(password_hash($data['password'], PASSWORD_BCRYPT));
+            }
             $user->setRole($data['role'] ?? $user->getRole());
             $this->userRepository->updateUser($userId, $user);
         } else {
@@ -44,9 +40,6 @@ class UserService
         }
     }
 
-    /**
-     * @throws Exception
-     */
     public function findById(int $userId): ?User
     {
         return $this->userRepository->findById($userId);
@@ -54,12 +47,9 @@ class UserService
 
     public function findAll(int $limit, int $offset): array
     {
-        $return $this->userRepository->findAll($limit, $offset);
+        return $this->userRepository->findAll($limit, $offset);
     }
 
-    /**
-     * @throws Exception
-     */
     public function deleteUser(int $userId): void
     {
         $user = $this->userRepository->findById($userId);
@@ -68,5 +58,14 @@ class UserService
         } else {
             throw new Exception("Пользователь не найден.");
         }
+    }
+
+    public function authenticate(string $email, string $password): ?User
+    {
+        $user = $this->userRepository->findOneBy(['email' => $email]);
+        if ($user && password_verify($password, $user->getPassword())) {
+            return $user;
+        }
+        return null;
     }
 }

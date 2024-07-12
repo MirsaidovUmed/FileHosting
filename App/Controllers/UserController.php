@@ -46,7 +46,7 @@ class UserController extends BaseController
     {
         try {
             $this->userService->createUser($request->getParams());
-            return $this->jsonResponse(['message' => 'Пользователь успешно создан'], 201);
+            return $this->jsonResponse(['message' => 'Пользователь успешно создан'], 200);
         } catch (Exception $e) {
             $errorData = json_decode($e->getMessage(), true);
             if (json_last_error() === JSON_ERROR_NONE) {

@@ -56,7 +56,7 @@ class User extends Model
         return $this->roleId;
     }
 
-    public function setRoleId(string $roleId): void
+    public function setRoleId(int $roleId): void
     {
         $this->roleId = $roleId;
     }

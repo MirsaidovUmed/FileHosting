@@ -4,6 +4,7 @@ namespace App\Core;
 
 use App\Core\DB\Connection;
 use App\Services\AuthService;
+use App\Models\User;
 use Exception;
 use ReflectionClass;
 use ReflectionException;

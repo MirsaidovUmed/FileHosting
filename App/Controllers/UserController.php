@@ -45,7 +45,7 @@ class UserController extends BaseController
         return match ($method) {
             'createUser', 'updateUser', 'deleteUser' => User::ROLE_ADMIN,
             'getUserList', 'getUserById' => User::ROLE_USER,
-            default => 0,
+            default => throw new Exception("Такой роли не сущетсвует"),
         };
     }
 

@@ -6,6 +6,7 @@ use App\Core\AbstractClasses\BaseController;
 use App\Core\Request;
 use App\Core\Response;
 use App\Services\UserService;
+use App\Models\User;
 use Exception;
 
 class UserController extends BaseController
@@ -42,8 +43,8 @@ class UserController extends BaseController
     public static function getRequiredRole(string $method): int
     {
         return match ($method) {
-            'createUser', 'updateUser', 'deleteUser' => 2,
-            'getUserList', 'getUserById' => 1,
+            'createUser', 'updateUser', 'deleteUser' => User::ROLE_ADMIN,
+            'getUserList', 'getUserById' => User::ROLE_USER,
             default => 0,
         };
     }

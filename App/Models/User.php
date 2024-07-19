@@ -7,10 +7,14 @@ use DateTime;
 
 class User extends Model
 {
+
+    const ROLE_ADMIN = 1;
+    const ROLE_USER = 2;
+
     private ?int $id;
     private string $login;
     private string $password;
-    private string $role;
+    private int $roleId;
 
     public static function getTableName(): string
     {
@@ -47,13 +51,13 @@ class User extends Model
         $this->password = $password;
     }
 
-    public function getRole(): string
+    public function getRoleId(): string
     {
-        return $this->role;
+        return $this->roleId;
     }
 
-    public function setRole(string $role): void
+    public function setRoleId(string $roleId): void
     {
-        $this->role = $role;
+        $this->roleId = $roleId;
     }
 }

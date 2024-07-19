@@ -20,7 +20,7 @@ class UserService
         $user = new User();
         $user->setLogin($data['login']);
         $user->setPassword(password_hash($data['password'], PASSWORD_BCRYPT));
-        $user->setRole($data['role']);
+        $user->setRoleId($data['role_id']);
         $this->userRepository->createUser($user);
     }
 
@@ -33,7 +33,7 @@ class UserService
             if (isset($data['password'])) {
                 $user->setPassword(password_hash($data['password'], PASSWORD_BCRYPT));
             }
-            $user->setRole($data['role'] ?? $user->getRole());
+            $user->setRoleId($data['role_id'] ?? $user->getRoleId());
             $this->userRepository->updateUser($userId, $user);
         } else {
             throw new Exception("Пользователь не найден.");

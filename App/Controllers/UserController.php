@@ -23,22 +23,28 @@ class UserController extends BaseController
             'createUser' => [
                 'login' => ['required', 'minLength:3'],
                 'password' => ['required', 'minLength:6'],
-                'role' => ['required']
+                'roleId' => ['required']
             ],
             'updateUser' => [
                 'id' => ['required', 'integer'],
                 'login' => ['required', 'minLength:3'],
                 'password' => ['required', 'minLength:6'],
-                'role' => ['required']
-            ],
-            'getUserById', 'deleteUser' => [
-                'id' => ['required', 'integer']
+                'roleId' => ['required']
             ],
             'getUserList' => [
                 'limit' => ['required', 'integer'],
                 'offset' => ['required', 'integer']
             ] ,
-            default => []
+            default => throw new Exception("Метод не существует") 
+        };
+    }
+
+    public static function getRequiredRole(string $method): int
+    {
+        return match ($method) {
+            'createUser', 'updateUser', 'deleteUser' => 2,
+            'getUserList', 'getUserById' => 1,
+            default => 0,
         };
     }
 
@@ -93,10 +99,6 @@ class UserController extends BaseController
 
     public function getUserList(Request $request): Response
     {
-        if (!$request->validate($validationRules)) {
-            return $this->jsonResponse(['errors' => $request->getValidationErrors()], 400);
-        }
-
         $data = $request->getParams();
 
         try {

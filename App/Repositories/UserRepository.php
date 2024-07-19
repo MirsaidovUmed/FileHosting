@@ -19,11 +19,11 @@ class UserRepository extends Repository
      */
     public function createUser(User $user): void
     {
-        $query = 'INSERT INTO users (login, password, role) VALUES (:login, :password, :role)';
+        $query = 'INSERT INTO users (login, password, roleId) VALUES (:login, :password, :role_id)';
         $params = [
             'login' => $user->getLogin(),
             'password' => $user->getPassword(),
-            'role' => $user->getRole()
+            'role_id' => $user->getRoleId()
         ];
         if (!$this->execute($query, $params)) {
             throw new Exception("Не удалось создать пользователя.");
@@ -35,11 +35,11 @@ class UserRepository extends Repository
      */
     public function updateUser(int $id, User $user): void
     {
-        $query = 'UPDATE users SET login = :login, password = :password, role = :role WHERE id = :id';
+        $query = 'UPDATE users SET login = :login, password = :password, roleId = :role_id WHERE id = :id';
         $params = [
             'login' => $user->getLogin(),
             'password' => $user->getPassword(),
-            'role' => $user->getRole(),
+            'role_id' => $user->getRoleId(),
             'id' => $id
         ];
         if (!$this->execute($query, $params)) {
@@ -104,7 +104,7 @@ class UserRepository extends Repository
             $data['id'],
             $data['login'],
             $data['password'],
-            $data['role'],
+            $data['roleId'],
             new DateTime($data['created_date'])
         );
     }

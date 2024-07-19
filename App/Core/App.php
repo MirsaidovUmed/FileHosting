@@ -3,6 +3,7 @@
 namespace App\Core;
 
 use App\Core\DB\Connection;
+use App\Services\AuthService;
 use Exception;
 use ReflectionClass;
 use ReflectionException;
@@ -14,6 +15,7 @@ class App
     private array $repositories = [];
     private Config $config;
     private Validator $validator;
+    private AuthService $authService;
 
     public function __construct(Validator $validator)
     {
@@ -99,6 +101,12 @@ class App
                 $this->services[$serviceName] = $reflector->newInstanceArgs($dependencies);
             }
         }
+
+         if (isset($this->services[AuthService::class])) {
+            $this->authService = $this->services[AuthService::class];
+        } else {
+            throw new Exception('AuthService not found');
+        }
     }
 
     public function handleRequest(Request $request): Response
@@ -109,14 +117,22 @@ class App
             $controllerMethod = $controllerInfo['method'];
             $params = $controllerInfo['params'];
 
-            $validationRules = $controllerClass::getValidationRules($controllerMethod);
+            $user = $this->getUserFromRequest($request);
+            if (!$user) {
+                return new Response('Пользователь не аутентифицирован', 401);
+            }
 
+            $requiredRoleId = $controllerClass::getRequiredRole($controllerMethod);
+            if (!$this->authService->authorize($user, $requiredRoleId)) {
+                return new Response('Доступ запрещен', 403);
+            }
+
+            $validationRules = $controllerClass::getValidationRules($controllerMethod);
             if (!$this->validateRequest($request, $validationRules)) {
                 return new Response(json_encode(['errors' => $this->validator->getErrors()]), 400);
             }
 
             $controller = $this->createController($controllerClass);
-
             $request->setParams(array_merge($request->getParams(), $params));
 
             $method = new ReflectionMethod($controller, $controllerMethod);
@@ -195,5 +211,14 @@ class App
     private function validateRequest(Request $request, array $rules): bool
     {
         return $this->validator->validate($request->getParams(), $rules);
+    }
+
+    private function getUserFromRequest(Request $request): ?User
+    {
+        $token = $request->getHeader('Authorization');
+        if ($token) {
+            return $this->authService->getUserByToken($token);
+        }
+        return null;
     }
 }

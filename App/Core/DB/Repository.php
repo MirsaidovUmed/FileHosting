@@ -153,4 +153,47 @@ abstract class Repository implements IRepository
 
         return 'ORDER BY ' . implode(', ', $order);
     }
+
+    /**
+     * @throws Exception
+     */
+    public function save(object $model): void
+    {
+        $modelClass = static::getModelClass();
+        if (get_class($model) !== $modelClass) {
+            throw new Exception("Model is not an instance of $modelClass");
+        }
+
+        $table = $modelClass::getTableName();
+        $fields = get_object_vars($model);
+        $columns = array_keys($fields);
+        $placeholders = array_map(fn($col) => ":$col", $columns);
+
+        if ($model->getId() === null) {
+            $query = "INSERT INTO $table (" . implode(', ', $columns) . ") VALUES (" . implode(', ', $placeholders) . ")";
+        } else {
+            $setClause = implode(', ', array_map(fn($col) => "$col = :$col", $columns));
+            $query = "UPDATE $table SET $setClause WHERE id = :id";
+            $fields['id'] = $model->getId();
+        }
+
+        $this->execute($query, $fields);
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function delete(object $model): void
+    {
+        $modelClass = static::getModelClass();
+        if (get_class($model) !== $modelClass) {
+            throw new Exception("Model is not an instance of $modelClass");
+        }
+
+        $table = $modelClass::getTableName();
+        $query = "DELETE FROM $table WHERE id = :id";
+        $params = ['id' => $model->getId()];
+
+        $this->execute($query, $params);
+    }
 }

@@ -55,4 +55,10 @@ class Request
     {
         $this->params = $params;
     }
+
+    public function getHeader(string $header): ?string
+    {
+        $headers = getallheaders();
+        return $headers[$header] ?? null;
+    }
 }

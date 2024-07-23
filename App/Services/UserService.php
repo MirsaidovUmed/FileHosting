@@ -59,13 +59,4 @@ class UserService
             throw new Exception("Пользователь не найден.");
         }
     }
-
-    public function authenticate(string $email, string $password): ?User
-    {
-        $user = $this->userRepository->findOneBy(['email' => $email]);
-        if ($user && password_verify($password, $user->getPassword())) {
-            return $user;
-        }
-        return null;
-    }
 }

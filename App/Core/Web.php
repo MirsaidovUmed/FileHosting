@@ -15,6 +15,9 @@ class Web
         ],
         'user/list' => [
             'GET' => 'UserController::getUserList',
+        ],
+        'admin/users/list' =>[
+            'GET'=> 'UserAdminController::getUserList',
         ]
     ];
 }

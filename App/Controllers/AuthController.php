@@ -18,41 +18,39 @@ class AuthController extends BaseController
         $this->authService = $authService;
     }
 
+    public static function getValidationRules(string $method): array
+    {
+        return match ($method) {
+            'login' => [
+                'email' => ['required', 'email'],
+                'password' => ['required'],
+            ],
+            default => throw new Exception("Метод не существует"),
+        };
+    }
+
+    public static function getRequiredRole(string $method): int
+    {
+        return match ($method) {
+            'login' => User::ROLE_GUEST,
+            default => throw new Exception("Такой роли не существует"),
+        };
+    }
+
     public function login(Request $request): Response
     {
-        $params = $request->getParams();
-        $user = $this->authService->authenticate($params['login'], $params['password']);
-        if ($user) {
-            $token = $this->authService->generateToken($user);
-            return $this->jsonResponse(['token' => $token], 200);
-        } else {
-            return $this->jsonResponse(['error' => 'Неверный логин или пароль'], 401);
-        }
-    }
+        $data = $request->getParams();
 
-    public function logout(Request $request): Response
-    {
-        $token = $request->getHeader('Authorization');
-        if ($token) {
-            $this->authService->logout($token);
-            return $this->jsonResponse(['message' => 'Вы вышли из системы'], 200);
-        } else {
-            return $this->jsonResponse(['error' => 'Токен не предоставлен'], 400);
-        }
-    }
+        try {
+            $user = $this->authService->authenticate($data['email'], $data['password']);
 
-    public function checkAccess(Request $request, int $requiredRoleId): bool
-    {
-        $user = $this->getUserFromRequest($request);
-        return $this->authService->authorize($user, $requiredRoleId);
-    }
-
-    private function getUserFromRequest(Request $request): ?User
-    {
-        $token = $request->getHeader('Authorization');
-        if ($token) {
-            return $this->authService->getUserByToken($token);
+            if ($user) {
+                return $this->jsonResponse(['message' => 'Успешный вход', 'user' => $user], 200);
+            } else {
+                return $this->errorResponse('Неправильный email или пароль', 401);
+            }
+        } catch (Exception $e) {
+            return $this->errorResponse($e->getMessage(), 400);
         }
-        return null;
     }
 }

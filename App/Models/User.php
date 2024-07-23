@@ -11,6 +11,7 @@ class User extends Model implements UserInterface
 
     const ROLE_ADMIN = 1;
     const ROLE_USER = 2;
+    const ROLE_GUEST = 0;
 
     private ?int $id;
     private string $login;

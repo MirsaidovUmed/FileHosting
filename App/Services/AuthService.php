@@ -22,7 +22,7 @@ class AuthService
     public function authenticate(string $login, string $password): ?User
     {
         $user = $this->userRepository->findOneBy(['login' => $login]);
-        if ($user && password_verify($password, $user->getPassword())) {
+        if ($user instanceof User && password_verify($password, $user->getPassword())) {
             return $user;
         }
         return null;

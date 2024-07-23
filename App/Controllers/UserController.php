@@ -5,8 +5,8 @@ namespace App\Controllers;
 use App\Core\AbstractClasses\BaseController;
 use App\Core\Request;
 use App\Core\Response;
-use App\Services\UserService;
 use App\Models\User;
+use App\Services\UserService;
 use Exception;
 
 class UserController extends BaseController
@@ -24,19 +24,19 @@ class UserController extends BaseController
             'createUser' => [
                 'login' => ['required', 'minLength:3'],
                 'password' => ['required', 'minLength:6'],
-                'roleId' => ['required']
+                'role_id' => ['required'],
             ],
             'updateUser' => [
                 'id' => ['required', 'integer'],
                 'login' => ['required', 'minLength:3'],
                 'password' => ['required', 'minLength:6'],
-                'roleId' => ['required']
+                'role_id' => ['required'],
             ],
             'getUserList' => [
                 'limit' => ['required', 'integer'],
-                'offset' => ['required', 'integer']
-            ] ,
-            default => throw new Exception("Метод не существует") 
+                'offset' => ['required', 'integer'],
+            ],
+            default => throw new Exception("Метод не существует"),
         };
     }
 
@@ -45,7 +45,7 @@ class UserController extends BaseController
         return match ($method) {
             'createUser', 'updateUser', 'deleteUser' => User::ROLE_ADMIN,
             'getUserList', 'getUserById' => User::ROLE_USER,
-            default => throw new Exception("Такой роли не сущетсвует"),
+            default => throw new Exception("Такой роли не существует"),
         };
     }
 
@@ -110,9 +110,6 @@ class UserController extends BaseController
         }
     }
 
-    /**
-     * @throws Exception
-     */
     public function deleteUser(Request $request): Response
     {
         $data = $request->getParams();

@@ -23,8 +23,9 @@ class UserRepository extends Repository
         $params = [
             'login' => $user->getLogin(),
             'password' => $user->getPassword(),
-            'role_id' => $user->getRoleId()
+            'role_id' => $user->getRoleId(),
         ];
+
         if (!$this->execute($query, $params)) {
             throw new Exception("Не удалось создать пользователя.");
         }
@@ -40,8 +41,9 @@ class UserRepository extends Repository
             'login' => $user->getLogin(),
             'password' => $user->getPassword(),
             'role_id' => $user->getRoleId(),
-            'id' => $id
+            'id' => $id,
         ];
+
         if (!$this->execute($query, $params)) {
             throw new Exception("Не удалось обновить пользователя.");
         }
@@ -63,27 +65,10 @@ class UserRepository extends Repository
     {
         $query = 'DELETE FROM users WHERE id = :id';
         $params = ['id' => $id];
+
         if (!$this->execute($query, $params)) {
             throw new Exception("Не удалось удалить пользователя.");
         }
-    }
-
-    /**
-     * @throws Exception
-     */
-    public function findOneBy(array $criteria, array $sort = []): ?User
-    {
-        $data = parent::findOneBy($criteria, $sort);
-        return $data ? $this->deserialize($data) : null;
-    }
-
-    /**
-     * @throws Exception
-     */
-    public function findBy(array $criteria, array $sort = [], int $limit = 20, int $offset = 0): ?array
-    {
-        $results = parent::findBy($criteria, $sort, $limit, $offset);
-        return array_map([$this, 'deserialize'], $results);
     }
 
     /**

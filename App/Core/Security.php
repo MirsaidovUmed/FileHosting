@@ -2,25 +2,25 @@
 
 namespace App\Core;
 
-use App\Models\User;
+use App\Core\Interfaces\UserInterface;
 
 class Security {
-    private User $user;
+    private ?UserInterface $user;
 
-    public function __construct($user = null) {
+    public function __construct(UserInterface $user = null) {
         $this->user = $user;
     }
 
-    public function hasAccess($requiredRole) {
-        return $this->user && $this->user['role'] >= $requiredRole;
+    public function hasAccess(int $requiredRole): bool {
+        return $this->user && $this->user->getRoleId() >= $requiredRole;
     }
 
-    public function getUser(): User
+    public function getUser(): ?UserInterface
     {
         return $this->user;
     }
 
-    public function setUser(User $user): void
+    public function setUser(UserInterface $user): void
     {
         $this->user = $user;
     }

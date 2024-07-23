@@ -3,9 +3,10 @@
 namespace App\Models;
 
 use App\Core\DB\Model;
+use App\Core\Interfaces\UserInterface;
 use DateTime;
 
-class User extends Model
+class User extends Model implements UserInterface
 {
 
     const ROLE_ADMIN = 1;
@@ -51,7 +52,7 @@ class User extends Model
         $this->password = $password;
     }
 
-    public function getRoleId(): string
+    public function getRoleId(): int
     {
         return $this->roleId;
     }

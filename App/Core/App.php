@@ -3,6 +3,7 @@
 namespace App\Core;
 
 use App\Core\DB\Connection;
+use App\Core\Interfaces\UserInterface;
 use App\Services\AuthService;
 use App\Models\User;
 use Exception;
@@ -144,7 +145,7 @@ class App
             return new Response('Ошибка сервера: ' . $e->getMessage(), 500);
         }
     }
-
+    
     /**
      * @throws ReflectionException
      * @throws Exception
@@ -214,7 +215,7 @@ class App
         return $this->validator->validate($request->getParams(), $rules);
     }
 
-    private function getUserFromRequest(Request $request): ?User
+    private function getUserFromRequest(Request $request): ?UserInterface
     {
         $token = $request->getHeader('Authorization');
         if ($token) {

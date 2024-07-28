@@ -1,0 +1,22 @@
+{
+    "name": "oskar/file",
+    "description": "Cloud-based file storage and sharing application allowing users to upload, organize, and share files remotely. This project reinforces practical knowledge in working with REST API, MySQL database, and PHP filesystem capabilities.",
+    "type": "project",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "App\\": "App/",
+            "Config\\":"App/Core"
+        }
+    },
+    "authors": [
+        {
+            "name": "MirsaidovUmed",
+            "email": "umedmirsaidov61@gmail.com"
+        }
+    ],
+    "minimum-stability": "stable",
+    "require": {
+      "ext-pdo": "*"
+    }
+}

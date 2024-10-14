@@ -13,10 +13,16 @@ class User extends Model implements UserInterface
     const ROLE_USER = 2;
     const ROLE_GUEST = 0;
 
-    private ?int $id;
-    private string $login;
-    private string $password;
-    private int $roleId;
+    public function __construct(
+        private ?int $id,
+        private string $login,
+        private string $password,
+        private int $roleId,
+        private ?DateTime $createDate
+    )
+    {
+
+    }
 
     public static function getTableName(): string
     {
@@ -61,5 +67,15 @@ class User extends Model implements UserInterface
     public function setRoleId(int $roleId): void
     {
         $this->roleId = $roleId;
+    }
+
+    public function getDate(): ?DateTime
+    {
+        return $this->createDate;
+    }
+
+    public function setDate(DateTime $createDate): void
+    {
+        $this->createDate = $createDate;
     }
 }
